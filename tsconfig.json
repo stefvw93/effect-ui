@@ -1,0 +1,28 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"exclude": ["dist/**/*"],
+
+	"compilerOptions": {
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"target": "esnext",
+		"lib": ["esnext", "dom"],
+		"types": ["node"],
+
+		"noEmit": true,
+		"stripInternal": true,
+		"paths": {
+			"@/*": ["./src/*"],
+			"~/*": ["./*"]
+		},
+
+		"noUncheckedIndexedAccess": true,
+		"noImplicitReturns": true,
+		"strict": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"noUncheckedSideEffectImports": true,
+		"moduleDetection": "force",
+		"skipLibCheck": true
+	}
+}

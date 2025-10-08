@@ -1,0 +1,29 @@
+# Logs
+logs
+*.log
+pnpm-debug.log*
+
+# Editors
+.vscode
+.idea
+
+# Testing
+coverage/
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Dependency directories
+node_modules/
+
+# dotenv environment variable files
+.env
+.env.*
+!.env.example
+
+# output
+dist
+*.tsbuildinfo
+
+# os
+.DS_Store

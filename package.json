@@ -1,0 +1,26 @@
+{
+	"name": "std-nodejs-typescript",
+	"engines": {
+		"node": ">=24.7.0",
+		"pnpm": ">=10.15.0"
+	},
+	"version": "1.0.0",
+	"description": "A minimal Node.js + TypeScript project template",
+	"license": "ISC",
+	"author": "",
+	"type": "module",
+	"scripts": {
+		"build": "tsdown",
+		"lint": "biome check",
+		"lint.fix": "biome check --write",
+		"test": "node --import tsx --test src/**/*.test.{ts,tsx}",
+		"test.watch": "node --import tsx --test --watch src/**/*.test.{ts,tsx}"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.5",
+		"@types/node": "^24.7.0",
+		"tsdown": "^0.15.6",
+		"tsx": "^4.20.6",
+		"typescript": "^5.9.3"
+	}
+}
