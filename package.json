@@ -14,7 +14,8 @@
 		"lint": "biome check",
 		"lint.fix": "biome check --write",
 		"test": "node --import tsx --test src/**/*.test.{ts,tsx}",
-		"test.watch": "node --import tsx --test --watch src/**/*.test.{ts,tsx}"
+		"test.watch": "node --import tsx --test --watch src/**/*.test.{ts,tsx}",
+		"typecheck": "tsc"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.5",
@@ -22,5 +23,9 @@
 		"tsdown": "^0.15.6",
 		"tsx": "^4.20.6",
 		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"effect": "^3.18.4",
+		"html-jsx": "^1.0.0"
 	}
 }
