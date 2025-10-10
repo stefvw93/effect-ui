@@ -1,4 +1,5 @@
 import {
+	Context,
 	Data,
 	Effect,
 	Exit,
@@ -41,17 +42,20 @@ export class RenderError extends Data.TaggedError("RenderError")<{
 }> {}
 
 // ============================================================================
-// Internal Types
+// Services
 // ============================================================================
 
 /**
- * Internal context for rendering operations
+ * Service for managing rendering context including runtime, scope, and stream IDs
  */
-interface RenderContext {
-	readonly runtime: ManagedRuntime.ManagedRuntime<never, unknown>;
-	readonly scope: Scope.Scope;
-	readonly streamIdCounter: { current: number };
-}
+export class RenderContext extends Context.Tag("RenderContext")<
+	RenderContext,
+	{
+		readonly runtime: ManagedRuntime.ManagedRuntime<never, never>;
+		readonly scope: Scope.Scope;
+		readonly streamIdCounter: { current: number };
+	}
+>() {}
 
 /**
  * Result of rendering a JSXNode - can be single node, multiple nodes, or null
@@ -109,7 +113,8 @@ export function mount(
 		const runtime = createMountRuntime();
 		const scope = yield* Scope.make();
 
-		const context: RenderContext = {
+		// Create the RenderContext service implementation
+		const context = {
 			runtime,
 			scope,
 			streamIdCounter: { current: 0 },
@@ -118,8 +123,10 @@ export function mount(
 		// AC1: Clear root element's existing children
 		root.innerHTML = "";
 
-		// AC1: Render the JSX tree
-		const result = yield* renderNode(app, context);
+		// AC1: Render the JSX tree with the provided context
+		const result = yield* renderNode(app).pipe(
+			Effect.provideService(RenderContext, context),
+		);
 
 		// AC1: Append rendered nodes to root
 		if (result !== null) {
@@ -163,15 +170,18 @@ export function mount(
 /**
  * Creates a fresh ManagedRuntime for a mount operation
  */
-function createMountRuntime(): ManagedRuntime.ManagedRuntime<never, unknown> {
-	return ManagedRuntime.make(Layer.empty);
+function createMountRuntime(): ManagedRuntime.ManagedRuntime<never, never> {
+	return ManagedRuntime.make(Layer.empty as Layer.Layer<never, never>);
 }
 
 /**
  * Generates next unique stream ID
  */
-function nextStreamId(counter: { current: number }): number {
-	return ++counter.current;
+function nextStreamId(): Effect.Effect<number, never, RenderContext> {
+	return Effect.gen(function* () {
+		const context = yield* RenderContext;
+		return ++context.streamIdCounter.current;
+	});
 }
 
 // Effect.isEffect is used directly from the Effect library
@@ -213,10 +223,10 @@ function normalizeToStream<A>(
  */
 function renderNode(
 	node: JSXNode,
-	context: RenderContext,
 ): Effect.Effect<
 	RenderResult,
-	InvalidElementType | StreamSubscriptionError | RenderError
+	InvalidElementType | StreamSubscriptionError | RenderError,
+	RenderContext
 > {
 	return Effect.gen(function* () {
 		// AC2: Handle primitives
@@ -238,7 +248,7 @@ function renderNode(
 			// Streams/Effects as direct children need to be wrapped in markers
 			const stream = normalizeToStream(node);
 			const fragment = document.createDocumentFragment();
-			const markers = yield* handleStreamChild(stream, fragment, context);
+			const markers = yield* handleStreamChild(stream, fragment);
 			return markers;
 		}
 
@@ -249,7 +259,7 @@ function renderNode(
 			!("type" in node)
 		) {
 			const flattened = flattenChildren(node);
-			return yield* renderChildren(flattened, context);
+			return yield* renderChildren(flattened);
 		}
 
 		// Handle JSX elements: { type, props }
@@ -263,12 +273,12 @@ function renderNode(
 
 			// AC6: Fragment
 			if (type === FRAGMENT) {
-				return yield* renderFragment(props, context);
+				return yield* renderFragment(props);
 			}
 
 			// AC4: Element (string type)
 			if (typeof type === "string") {
-				return yield* renderElement(type, props, context);
+				return yield* renderElement(type, props);
 			}
 
 			// AC5: Function component
@@ -276,7 +286,6 @@ function renderNode(
 				return yield* renderComponent(
 					type as (props: object) => JSXNode,
 					props,
-					context,
 				);
 			}
 
@@ -330,10 +339,10 @@ function flattenChildren(node: JSXNode): readonly JSXNode[] {
  */
 function renderChildren(
 	children: readonly JSXNode[],
-	context: RenderContext,
 ): Effect.Effect<
 	readonly Node[],
-	InvalidElementType | StreamSubscriptionError | RenderError
+	InvalidElementType | StreamSubscriptionError | RenderError,
+	RenderContext
 > {
 	return Effect.gen(function* () {
 		const nodes: Node[] = [];
@@ -343,10 +352,10 @@ function renderChildren(
 			if (isStream(child) || Effect.isEffect(child)) {
 				const stream = normalizeToStream(child) as Stream.Stream<JSXNode>;
 				const fragment = document.createDocumentFragment();
-				const markers = yield* handleStreamChild(stream, fragment, context);
+				const markers = yield* handleStreamChild(stream, fragment);
 				nodes.push(...markers);
 			} else {
-				const result = yield* renderNode(child, context);
+				const result = yield* renderNode(child);
 
 				if (result !== null) {
 					if (Array.isArray(result)) {
@@ -367,10 +376,10 @@ function renderChildren(
  */
 function renderFragment(
 	props: object,
-	context: RenderContext,
 ): Effect.Effect<
 	readonly Node[],
-	InvalidElementType | StreamSubscriptionError | RenderError
+	InvalidElementType | StreamSubscriptionError | RenderError,
+	RenderContext
 > {
 	return Effect.gen(function* () {
 		const children = "children" in props ? props.children : undefined;
@@ -380,7 +389,7 @@ function renderFragment(
 		}
 
 		const childArray = Array.isArray(children) ? children : [children];
-		return yield* renderChildren(childArray, context);
+		return yield* renderChildren(childArray);
 	});
 }
 
@@ -390,17 +399,17 @@ function renderFragment(
 function renderElement(
 	type: string,
 	props: object,
-	context: RenderContext,
 ): Effect.Effect<
 	HTMLElement,
-	InvalidElementType | StreamSubscriptionError | RenderError
+	InvalidElementType | StreamSubscriptionError | RenderError,
+	RenderContext
 > {
 	return Effect.gen(function* () {
 		// AC4: Create element using document.createElement
 		const element = document.createElement(type);
 
 		// AC4: Set attributes/props first
-		yield* setElementProps(element, props, context);
+		yield* setElementProps(element, props);
 
 		// AC4: Then append children
 		const children = "children" in props ? props.children : undefined;
@@ -412,12 +421,12 @@ function renderElement(
 				// Check if child is a stream/effect
 				if (isStream(child) || Effect.isEffect(child)) {
 					const stream = normalizeToStream(child) as Stream.Stream<JSXNode>;
-					const markers = yield* handleStreamChild(stream, element, context);
+					const markers = yield* handleStreamChild(stream, element);
 					for (const marker of markers) {
 						element.appendChild(marker);
 					}
 				} else {
-					const result = yield* renderNode(child, context);
+					const result = yield* renderNode(child);
 					if (result !== null) {
 						if (Array.isArray(result)) {
 							for (const node of result) {
@@ -441,10 +450,10 @@ function renderElement(
 function renderComponent(
 	component: (props: object) => JSXNode,
 	props: object,
-	context: RenderContext,
 ): Effect.Effect<
 	RenderResult,
-	InvalidElementType | StreamSubscriptionError | RenderError
+	InvalidElementType | StreamSubscriptionError | RenderError,
+	RenderContext
 > {
 	return Effect.gen(function* () {
 		// AC5: Call function once with props (ephemeral execution)
@@ -457,14 +466,14 @@ function renderComponent(
 			// AC22: Component returning stream treated as stream child
 			// Create a temporary container to hold markers
 			const fragment = document.createDocumentFragment();
-			const markers = yield* handleStreamChild(stream, fragment, context);
+			const markers = yield* handleStreamChild(stream, fragment);
 
 			// Return all markers as array
 			return markers;
 		}
 
 		// AC5: Plain JSXNode
-		return yield* renderNode(result, context);
+		return yield* renderNode(result);
 	});
 }
 
@@ -478,8 +487,7 @@ function renderComponent(
 function setElementProps(
 	element: HTMLElement,
 	props: object,
-	context: RenderContext,
-): Effect.Effect<void, StreamSubscriptionError> {
+): Effect.Effect<void, StreamSubscriptionError, RenderContext> {
 	return Effect.gen(function* () {
 		for (const [key, value] of Object.entries(props)) {
 			// AC7: Skip children prop
@@ -489,15 +497,15 @@ function setElementProps(
 
 			// AC10-AC13: Special handling for style
 			if (key === "style") {
-				yield* handleStyle(element, value, context);
+				yield* handleStyle(element, value);
 				continue;
 			}
 
 			// AC7: Determine if property or attribute
 			if (isProperty(element, key)) {
-				yield* setProperty(element, key, value, context);
+				yield* setProperty(element, key, value);
 			} else {
-				yield* setAttribute(element, key, value, context);
+				yield* setAttribute(element, key, value);
 			}
 		}
 	});
@@ -531,8 +539,7 @@ function setProperty(
 	element: HTMLElement,
 	name: string,
 	value: unknown,
-	context: RenderContext,
-): Effect.Effect<void, StreamSubscriptionError> {
+): Effect.Effect<void, StreamSubscriptionError, RenderContext> {
 	return Effect.gen(function* () {
 		// AC14: Normalize Effect/Stream
 		if (isStream(value) || Effect.isEffect(value)) {
@@ -547,7 +554,6 @@ function setProperty(
 						(element as unknown as Record<string, unknown>)[name] = val;
 					}
 				},
-				context,
 				`property:${name}`,
 			);
 		} else {
@@ -566,8 +572,7 @@ function setAttribute(
 	element: HTMLElement,
 	name: string,
 	value: unknown,
-	context: RenderContext,
-): Effect.Effect<void, StreamSubscriptionError> {
+): Effect.Effect<void, StreamSubscriptionError, RenderContext> {
 	return Effect.gen(function* () {
 		// AC14: Normalize Effect/Stream
 		if (isStream(value) || Effect.isEffect(value)) {
@@ -594,7 +599,6 @@ function setAttribute(
 						}
 					}
 				},
-				context,
 				`attribute:${name}`,
 			);
 		} else {
@@ -639,8 +643,7 @@ function serializeAttributeValue(value: unknown): string | undefined {
 function handleStyle(
 	element: HTMLElement,
 	value: unknown,
-	context: RenderContext,
-): Effect.Effect<void, StreamSubscriptionError> {
+): Effect.Effect<void, StreamSubscriptionError, RenderContext> {
 	return Effect.gen(function* () {
 		// AC13: Stream of styles
 		if (isStream(value) || Effect.isEffect(value)) {
@@ -667,7 +670,6 @@ function handleStyle(
 						}
 					}
 				},
-				context,
 				"style",
 			);
 			return;
@@ -681,11 +683,7 @@ function handleStyle(
 
 		// AC11-AC12: Object form
 		if (typeof value === "object" && value !== null) {
-			yield* setStyleFromObject(
-				element,
-				value as Record<string, unknown>,
-				context,
-			);
+			yield* setStyleFromObject(element, value as Record<string, unknown>);
 		}
 	});
 }
@@ -696,8 +694,7 @@ function handleStyle(
 function setStyleFromObject(
 	element: HTMLElement,
 	styleObj: Record<string, unknown>,
-	context: RenderContext,
-): Effect.Effect<void, StreamSubscriptionError> {
+): Effect.Effect<void, StreamSubscriptionError, RenderContext> {
 	return Effect.gen(function* () {
 		for (const [key, value] of Object.entries(styleObj)) {
 			// AC12: Handle stream properties
@@ -710,7 +707,6 @@ function setStyleFromObject(
 							element.style.setProperty(camelToKebab(key), String(val));
 						}
 					},
-					context,
 					`style.${key}`,
 				);
 			} else {
@@ -740,10 +736,11 @@ function camelToKebab(str: string): string {
 function subscribeToStream<A>(
 	stream: Stream.Stream<A>,
 	onValue: (value: A) => void | Promise<void>,
-	context: RenderContext,
 	_errorContext: string,
-): Effect.Effect<void, StreamSubscriptionError> {
+): Effect.Effect<void, StreamSubscriptionError, RenderContext> {
 	return Effect.gen(function* () {
+		const context = yield* RenderContext;
+
 		// Create the stream subscription effect
 		const effect = Stream.runForEach(stream, (value) =>
 			Effect.sync(() => {
@@ -771,20 +768,25 @@ function subscribeToStream<A>(
 function handleStreamChild(
 	stream: Stream.Stream<JSXNode>,
 	_parent: HTMLElement | DocumentFragment,
-	context: RenderContext,
 ): Effect.Effect<
 	readonly Node[],
-	StreamSubscriptionError | RenderError | InvalidElementType
+	StreamSubscriptionError | RenderError | InvalidElementType,
+	RenderContext
 > {
 	return Effect.gen(function* () {
+		const context = yield* RenderContext;
+
 		// AC19: Create comment markers
-		const streamId = nextStreamId(context.streamIdCounter);
+		const streamId = yield* nextStreamId();
 		const [startMarker, endMarker] = createStreamMarkers(streamId);
 
 		// AC20: Set up subscription to update content through the runtime
 		const effect = Stream.runForEach(stream, (value) => {
 			// Update the stream child for each emission
-			return updateStreamChild(startMarker, endMarker, value, context);
+			// Need to provide the context to updateStreamChild
+			return updateStreamChild(startMarker, endMarker, value).pipe(
+				Effect.provideService(RenderContext, context),
+			);
 		});
 
 		// Fork and run the stream effect through the runtime
@@ -813,17 +815,17 @@ function updateStreamChild(
 	startMarker: Comment,
 	endMarker: Comment,
 	newNode: JSXNode,
-	context: RenderContext,
 ): Effect.Effect<
 	void,
-	InvalidElementType | StreamSubscriptionError | RenderError
+	InvalidElementType | StreamSubscriptionError | RenderError,
+	RenderContext
 > {
 	return Effect.gen(function* () {
 		// AC20: Remove all nodes between markers
 		removeNodesBetweenMarkers(startMarker, endMarker);
 
 		// AC20: Render new node
-		const result = yield* renderNode(newNode, context);
+		const result = yield* renderNode(newNode);
 
 		// AC20: Insert new nodes between markers
 		const parent = startMarker.parentNode;
