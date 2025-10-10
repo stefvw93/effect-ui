@@ -4,8 +4,8 @@ export default defineConfig({
 	esbuild: {
 		jsx: "transform",
 		jsxDev: false,
-		jsxImportSource: "~",
-		jsxInject: `import { jsx, Fragment } from '~/jsx-runtime'`,
+		jsxImportSource: "@",
+		jsxInject: `import { jsx, Fragment } from '@/jsx-runtime'`,
 		jsxFactory: "jsx",
 		jsxFragment: "Fragment",
 	},
@@ -13,7 +13,7 @@ export default defineConfig({
 		alias: {
 			"@": new URL("./src", import.meta.url).pathname,
 			"~": new URL(".", import.meta.url).pathname,
-			"~/jsx-runtime": new URL("./jsx-runtime/index.ts", import.meta.url)
+			"@/jsx-runtime": new URL("./src/jsx-runtime/index.ts", import.meta.url)
 				.pathname,
 		},
 	},

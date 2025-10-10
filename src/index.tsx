@@ -1,5 +1,5 @@
 import { Context, Effect, Layer, ManagedRuntime } from "effect";
-import type { JSXNode } from "~/jsx-runtime";
+import type { JSXNode } from "@/jsx-runtime";
 
 export interface EffectUIRuntimeImpl {
 	readonly environment: "client" | "server";

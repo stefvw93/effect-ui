@@ -17,7 +17,7 @@
 		},
 
 		"jsx": "react-jsx",
-		"jsxImportSource": "~",
+		"jsxImportSource": "@",
 
 		"noUncheckedIndexedAccess": true,
 		"noImplicitReturns": true,

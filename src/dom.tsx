@@ -8,8 +8,8 @@ import {
 	Scope,
 	Stream,
 } from "effect";
-import type { JSXNode } from "~/jsx-runtime";
-import { FRAGMENT } from "~/jsx-runtime";
+import type { JSXNode } from "@/jsx-runtime";
+import { FRAGMENT } from "@/jsx-runtime";
 
 // ============================================================================
 // Error Types

@@ -1,7 +1,7 @@
 import type { Effect, Stream } from "effect";
 import type * as HTMLTypes from "html-jsx";
 
-export const FRAGMENT = Symbol("liquidx/fragment");
+export const FRAGMENT = Symbol("effect-ui/jsx-runtime/fragment");
 
 export type JSXType = typeof FRAGMENT | string | ((props: object) => JSXNode);
 
