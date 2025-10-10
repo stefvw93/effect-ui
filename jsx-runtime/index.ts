@@ -37,8 +37,8 @@ export function jsx(
 			type,
 			props: {
 				...normalizedProps,
-				children: children.length === 1 ? children[0] : children
-			}
+				children: children.length === 1 ? children[0] : children,
+			},
 		};
 	}
 
@@ -65,7 +65,11 @@ declare global {
 		type Element = JSXNode;
 
 		// Type for individual style properties that can be streams
-		type StreamableStyleValue = string | number | Stream.Stream<string | number> | Effect.Effect<string | number>;
+		type StreamableStyleValue =
+			| string
+			| number
+			| Stream.Stream<string | number>
+			| Effect.Effect<string | number>;
 
 		// Style object with potentially streamable properties
 		type StreamableStyleObject = {
@@ -83,7 +87,7 @@ declare global {
 
 		// Map HTML attributes to support both static values and Streams
 		type StreamCompatAttrs<T> = {
-			[K in keyof T]?: K extends 'style'
+			[K in keyof T]?: K extends "style"
 				? StyleProp
 				: T[K] | Stream.Stream<T[K]> | Effect.Effect<T[K]>;
 		};
@@ -99,11 +103,11 @@ declare global {
 		interface IntrinsicAttributes {}
 
 		interface HTMLAttributes<T>
-			extends Omit<StreamCompatAttrs<HTMLTypes.HTMLAttributes<T>>, 'style'> {
+			extends Omit<StreamCompatAttrs<HTMLTypes.HTMLAttributes<T>>, "style"> {
 			style?: StyleProp;
 		}
 		interface SVGAttributes<T>
-			extends Omit<StreamCompatAttrs<HTMLTypes.SVGAttributes<T>>, 'style'> {
+			extends Omit<StreamCompatAttrs<HTMLTypes.SVGAttributes<T>>, "style"> {
 			style?: StyleProp;
 		}
 		interface DOMAttributes<T>

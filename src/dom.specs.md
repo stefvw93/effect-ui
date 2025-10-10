@@ -201,16 +201,34 @@ Enable declarative, reactive UI rendering in the browser by mounting JSX trees t
 - **Then**:
   - Create fresh `ManagedRuntime` per mount
   - Use `ManagedRuntime.make(Layer.empty)` or similar
-  - Runtime not disposed (cleanup not implemented)
-  - Log warning about potential runtime leak
+  - Runtime must be properly disposed on unmount
+  - No warnings about runtime leaks when properly cleaned up
 
 ### AC25: Scope Management
 - **Given** stream subscriptions
 - **When** setting up subscriptions
 - **Then**:
-  - Use Scopes for future cleanup support
+  - Use Scopes for cleanup support
   - Fork streams in Scope context
-  - Structure code for easier cleanup implementation later
+  - All scopes closed on unmount
+
+### AC26: Unmount Function
+- **Given** a mounted JSX tree
+- **When** `unmount()` is called on the cleanup function
+- **Then**:
+  - Dispose the ManagedRuntime properly using `ManagedRuntime.dispose`
+  - Close all Scopes to cancel running streams
+  - Stop all stream subscriptions
+  - Returns an Effect that completes when cleanup is done
+  - No runtime leak warnings after proper cleanup
+
+### AC27: Mount Return Value
+- **Given** mount function is called
+- **When** the mount Effect completes
+- **Then**:
+  - Returns a cleanup function object with `unmount()` method
+  - The cleanup function can be called to properly dispose resources
+  - Calling unmount multiple times is safe (idempotent)
 
 ## Technical Requirements
 
@@ -235,7 +253,6 @@ Enable declarative, reactive UI rendering in the browser by mounting JSX trees t
 - Relies on standard DOM APIs
 
 ### Future Extensions
-- Cleanup/unmount support
 - SVG namespace support (`createElementNS`)
 - MathML namespace support
 - Custom elements support
@@ -246,7 +263,6 @@ Enable declarative, reactive UI rendering in the browser by mounting JSX trees t
 ## Constraints
 
 - HTML elements only (no SVG/MathML yet)
-- No cleanup/unmount (runtime leaks accepted)
 - No event handlers yet
 - No custom elements support yet
 - No prop name mapping (`class` not `className` - stay close to HTML spec)

@@ -1,5 +1,5 @@
-import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { Effect, Stream } from "effect";
 
 describe("Stream.make behavior", () => {
@@ -13,8 +13,8 @@ describe("Stream.make behavior", () => {
 				Effect.sync(() => {
 					console.log(`Emitted: ${value}`);
 					emittedValues.push(value);
-				})
-			)
+				}),
+			),
 		);
 
 		console.log("All emitted values:", emittedValues);
@@ -23,7 +23,7 @@ describe("Stream.make behavior", () => {
 
 	it("should emit all values to runForEach even with delays", async () => {
 		const emittedValues: string[] = [];
-		let emissionTimes: number[] = [];
+		const emissionTimes: number[] = [];
 		const startTime = Date.now();
 
 		const stream = Stream.make("first", "second", "third");
@@ -35,8 +35,8 @@ describe("Stream.make behavior", () => {
 					console.log(`Emitted '${value}' at ${elapsed}ms`);
 					emittedValues.push(value);
 					emissionTimes.push(elapsed);
-				})
-			)
+				}),
+			),
 		);
 
 		console.log("Emission times:", emissionTimes);
@@ -48,6 +48,9 @@ describe("Stream.make behavior", () => {
 
 		assert.deepEqual(emittedValues, ["first", "second", "third"]);
 		// They should all emit within a few milliseconds of each other
-		assert.ok(maxTimeDiff < 50, `Emissions took ${maxTimeDiff}ms, expected < 50ms`);
+		assert.ok(
+			maxTimeDiff < 50,
+			`Emissions took ${maxTimeDiff}ms, expected < 50ms`,
+		);
 	});
 });

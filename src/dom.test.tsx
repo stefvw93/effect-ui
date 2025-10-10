@@ -32,9 +32,11 @@ function createRoot(): HTMLElement {
 
 /**
  * Helper to run mount and wait for initial render
+ * Returns the mount handle for cleanup
  */
 async function runMount(app: unknown, root: HTMLElement) {
-	return await Effect.runPromise(mount(app as never, root));
+	const handle = await Effect.runPromise(mount(app as never, root));
+	return handle;
 }
 
 /**
@@ -98,24 +100,27 @@ describe("AC1: Mount Function API", () => {
 		assert.ok(true);
 	});
 
-	it("should log warning about runtime leaks", async () => {
+	it("should return cleanup handle with unmount function", async () => {
 		createTestDOM();
 		const root = createRoot();
-		const consoleSpy = mock.method(console, "warn", () => {});
 
-		await runMount(<div>test</div>, root);
+		const handle = await runMount(<div>test</div>, root);
 
-		assert.ok(consoleSpy.mock.calls.length > 0);
-		const calls = consoleSpy.mock.calls.map((call) => call.arguments.join(" "));
-		assert.ok(
-			calls.some(
-				(msg) =>
-					msg.toLowerCase().includes("runtime") &&
-					msg.toLowerCase().includes("leak"),
-			),
-		);
+		// Should have unmount function
+		assert.ok(typeof handle.unmount === "function");
+	});
 
-		consoleSpy.mock.restore();
+	it("should properly dispose runtime when unmounted", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const handle = await runMount(<div>test</div>, root);
+
+		// Should unmount without errors
+		await Effect.runPromise(handle.unmount());
+
+		// Unmounting again should be idempotent
+		await Effect.runPromise(handle.unmount());
 	});
 });
 
@@ -300,7 +305,6 @@ describe("AC5: Function Components", () => {
 			return Effect.sync(() => <div>Async Content</div>);
 		}
 
-		// @ts-expect-error - testing Effect<JSXNode> return type
 		await runMount(<AsyncComponent />, root);
 
 		// Effect is normalized to Stream which runs async
@@ -316,7 +320,6 @@ describe("AC5: Function Components", () => {
 			return Stream.make(<div>First</div>, <div>Second</div>);
 		}
 
-		// @ts-expect-error - testing Stream<JSXNode> return type
 		await runMount(<StreamComponent />, root);
 
 		// Stream.make emits all values synchronously, so only the last is visible
@@ -334,7 +337,6 @@ describe("AC5: Function Components", () => {
 			return Stream.make(<div>Count: 1</div>, <div>Count: 2</div>);
 		}
 
-		// @ts-expect-error - testing Stream<JSXNode> return type
 		await runMount(<Counter />, root);
 		await waitForStreamUpdate();
 
@@ -613,7 +615,6 @@ describe("AC12: Style with Stream Properties", () => {
 		const colorStream = Stream.make("red", "blue", "green");
 
 		await runMount(
-			// @ts-expect-error - testing Stream<string> in style
 			<div style={{ color: colorStream, fontSize: "16px" }}>test</div>,
 			root,
 		);
@@ -636,7 +637,6 @@ describe("AC12: Style with Stream Properties", () => {
 		const sizeStream = Stream.make("20px");
 
 		await runMount(
-			// @ts-expect-error - testing Stream<string> in style
 			<div style={{ color: colorStream, fontSize: sizeStream }}>test</div>,
 			root,
 		);
@@ -749,7 +749,7 @@ describe("AC15: Reactive Attribute/Property Updates", () => {
 		createTestDOM();
 		const root = createRoot();
 
-		const valueStream = Stream.make<string | null>("value", null);
+		const valueStream = Stream.make("value", null as string | null);
 
 		await runMount(<div data-value={valueStream}>test</div>, root);
 
@@ -763,7 +763,7 @@ describe("AC15: Reactive Attribute/Property Updates", () => {
 		createTestDOM();
 		const root = createRoot();
 
-		const valueStream = Stream.make<string | undefined>("value", undefined);
+		const valueStream = Stream.make("value", undefined as string | undefined);
 
 		await runMount(<div data-value={valueStream}>test</div>, root);
 
@@ -1015,7 +1015,6 @@ describe("AC22: Component Returning Stream", () => {
 			return Stream.make(<div>First</div>, <div>Second</div>);
 		}
 
-		// @ts-expect-error - testing Stream<JSXNode> return type
 		await runMount(<StreamComponent />, root);
 
 		// Stream.make emits all values synchronously, only last value is visible
@@ -1031,7 +1030,6 @@ describe("AC22: Component Returning Stream", () => {
 			return Stream.make(<div>Content</div>);
 		}
 
-		// @ts-expect-error - testing Stream<JSXNode> return type
 		await runMount(<StreamComponent />, root);
 
 		const nodes = Array.from(root.childNodes);

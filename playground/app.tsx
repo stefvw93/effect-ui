@@ -224,13 +224,47 @@ function App() {
 }
 
 // ============================================================================
-// Mount the app
+// Mount the app with unmount demo
 // ============================================================================
 
 const root = document.getElementById("root");
 if (root) {
 	Effect.runPromise(mount(<App />, root)).then(
-		() => console.log("✅ App mounted successfully"),
+		(handle) => {
+			console.log("✅ App mounted successfully");
+
+			// Store handle globally for debugging/cleanup
+			// @ts-expect-error - adding debug property to window
+			window.appHandle = handle;
+			console.log("💡 Tip: You can unmount the app by running:");
+			console.log("    await Effect.runPromise(appHandle.unmount())");
+
+			// Add an unmount button for demonstration
+			const unmountButton = document.createElement("button");
+			unmountButton.textContent = "Unmount App (Clean Shutdown)";
+			unmountButton.style.cssText = `
+				position: fixed;
+				bottom: 20px;
+				right: 20px;
+				padding: 10px 20px;
+				background: #f5576c;
+				color: white;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				font-weight: bold;
+				z-index: 9999;
+			`;
+			unmountButton.onclick = async () => {
+				console.log("🔄 Unmounting app...");
+				await Effect.runPromise(handle.unmount());
+				console.log("✅ App unmounted cleanly");
+				unmountButton.remove();
+				root.innerHTML =
+					"<div style='padding: 20px; text-align: center;'><h2>App Unmounted</h2><p>Refresh the page to restart</p></div>";
+			};
+			document.body.appendChild(unmountButton);
+		},
 		(error) => console.error("❌ Failed to mount app:", error),
 	);
 } else {
