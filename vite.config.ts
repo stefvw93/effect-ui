@@ -1,4 +1,3 @@
-import path from "node:path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -12,9 +11,10 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			"@": path.resolve(__dirname, "./src"),
-			"~": path.resolve(__dirname, "."),
-			"~/jsx-runtime": path.resolve(__dirname, "./jsx-runtime/index.ts"),
+			"@": new URL("./src", import.meta.url).pathname,
+			"~": new URL(".", import.meta.url).pathname,
+			"~/jsx-runtime": new URL("./jsx-runtime/index.ts", import.meta.url)
+				.pathname,
 		},
 	},
 	server: {
