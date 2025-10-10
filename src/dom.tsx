@@ -711,7 +711,7 @@ function subscribeToStream<A>(
 	stream: Stream.Stream<A>,
 	onValue: (value: A) => void | Promise<void>,
 	context: RenderContext,
-	errorContext: string,
+	_errorContext: string,
 ): Effect.Effect<void, StreamSubscriptionError> {
 	return Effect.gen(function* () {
 		// Create the stream subscription effect

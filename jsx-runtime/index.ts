@@ -64,9 +64,28 @@ declare global {
 	namespace JSX {
 		type Element = JSXNode;
 
+		// Type for individual style properties that can be streams
+		type StreamableStyleValue = string | number | Stream.Stream<string | number> | Effect.Effect<string | number>;
+
+		// Style object with potentially streamable properties
+		type StreamableStyleObject = {
+			[key: string]: StreamableStyleValue | undefined;
+		};
+
+		// Complete style property type supporting all variations
+		type StyleProp =
+			| string // Style string: "color: red; font-size: 16px"
+			| StreamableStyleObject // Object with potentially stream properties
+			| Stream.Stream<string> // Stream of style strings
+			| Stream.Stream<StreamableStyleObject> // Stream of style objects
+			| Effect.Effect<string> // Effect of style string
+			| Effect.Effect<StreamableStyleObject>; // Effect of style object
+
 		// Map HTML attributes to support both static values and Streams
 		type StreamCompatAttrs<T> = {
-			[K in keyof T]?: T[K] | Stream.Stream<T[K]> | Effect.Effect<T[K]>;
+			[K in keyof T]?: K extends 'style'
+				? StyleProp
+				: T[K] | Stream.Stream<T[K]> | Effect.Effect<T[K]>;
 		};
 
 		// Apply the mapped type to all intrinsic elements
@@ -80,9 +99,13 @@ declare global {
 		interface IntrinsicAttributes {}
 
 		interface HTMLAttributes<T>
-			extends StreamCompatAttrs<HTMLTypes.HTMLAttributes<T>> {}
+			extends Omit<StreamCompatAttrs<HTMLTypes.HTMLAttributes<T>>, 'style'> {
+			style?: StyleProp;
+		}
 		interface SVGAttributes<T>
-			extends StreamCompatAttrs<HTMLTypes.SVGAttributes<T>> {}
+			extends Omit<StreamCompatAttrs<HTMLTypes.SVGAttributes<T>>, 'style'> {
+			style?: StyleProp;
+		}
 		interface DOMAttributes<T>
 			extends StreamCompatAttrs<HTMLTypes.DOMAttributes<T>> {}
 	}

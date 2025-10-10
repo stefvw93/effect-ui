@@ -47,9 +47,9 @@ function DynamicStyles() {
 			<h2>Dynamic Styles</h2>
 			<div
 				style={{
-					width: sizeStream as any,
+					width: sizeStream,
 					height: "100px",
-					backgroundColor: colorStream as any,
+					backgroundColor: colorStream,
 					borderRadius: "8px",
 					transition: "all 0.5s ease",
 					display: "flex",
