@@ -184,8 +184,6 @@ function nextStreamId(): Effect.Effect<number, never, RenderContext> {
 	});
 }
 
-// Effect.isEffect is used directly from the Effect library
-
 /**
  * Checks if value is a Stream
  */
