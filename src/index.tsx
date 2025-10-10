@@ -1,11 +1,11 @@
 import { Context, Effect, Layer, ManagedRuntime } from "effect";
 import type { JSXNode } from "~/jsx-runtime";
 
-interface EffectUIRuntimeImpl {
+export interface EffectUIRuntimeImpl {
 	readonly environment: "client" | "server";
 }
 
-class EffectUIRuntime extends Context.Tag("effect-ui/UIContext")<
+export class EffectUIRuntime extends Context.Tag("effect-ui/UIContext")<
 	EffectUIRuntime,
 	EffectUIRuntimeImpl
 >() {}

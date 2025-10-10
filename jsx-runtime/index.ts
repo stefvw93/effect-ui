@@ -15,6 +15,8 @@ export type JSXNode =
 	| bigint
 	| boolean
 	| Iterable<JSXNode>
+	| Stream.Stream<JSXNode>
+	| Effect.Effect<JSXNode>
 	| { type: JSXType; props: object };
 
 export type PropsWithChildren<T = object> = T & {

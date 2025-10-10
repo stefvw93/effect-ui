@@ -19,7 +19,9 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.5",
+		"@types/jsdom": "^27.0.0",
 		"@types/node": "^24.7.0",
+		"jsdom": "^27.0.0",
 		"tsdown": "^0.15.6",
 		"tsx": "^4.20.6",
 		"typescript": "^5.9.3"
