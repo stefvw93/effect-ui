@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  setup:
-    name: Setup Dependencies
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -29,45 +29,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Upload node_modules
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-modules
-          path: node_modules
-          retention-days: 1
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    needs: [setup]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.15.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24.x
-
-      - name: Download node_modules
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: node_modules
-
       - name: Run linter
         run: pnpm lint
 
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
-    needs: [setup]
 
     steps:
       - name: Checkout repository
@@ -82,12 +49,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
+          cache: 'pnpm'
 
-      - name: Download node_modules
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: node_modules
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run type checking
         run: pnpm typecheck
@@ -95,7 +60,6 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: [setup]
 
     steps:
       - name: Checkout repository
@@ -110,12 +74,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
+          cache: 'pnpm'
 
-      - name: Download node_modules
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: node_modules
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests
         run: pnpm test
@@ -123,7 +85,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [setup]
 
     steps:
       - name: Checkout repository
@@ -138,12 +99,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
+          cache: 'pnpm'
 
-      - name: Download node_modules
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules
-          path: node_modules
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
         run: pnpm build
@@ -152,19 +111,17 @@ jobs:
   pr-check:
     name: PR Check Status
     runs-on: ubuntu-latest
-    needs: [setup, lint, typecheck, test, build]
+    needs: [lint, typecheck, test, build]
     if: always()
 
     steps:
       - name: Check validation status
         run: |
-          if [ "${{ needs.setup.result }}" != "success" ] || \
-             [ "${{ needs.lint.result }}" != "success" ] || \
+          if [ "${{ needs.lint.result }}" != "success" ] || \
              [ "${{ needs.typecheck.result }}" != "success" ] || \
              [ "${{ needs.test.result }}" != "success" ] || \
              [ "${{ needs.build.result }}" != "success" ]; then
             echo "❌ PR validation failed"
-            echo "Setup: ${{ needs.setup.result }}"
             echo "Lint: ${{ needs.lint.result }}"
             echo "Type Check: ${{ needs.typecheck.result }}"
             echo "Test: ${{ needs.test.result }}"
