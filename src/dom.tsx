@@ -153,6 +153,7 @@ export function mount(
 					unmounted = true;
 
 					// AC26: Close scope to cancel all running streams
+					// All fibers forked with Effect.forkIn will be automatically interrupted
 					yield* Scope.close(scope, Exit.void);
 
 					// AC26: Dispose the ManagedRuntime
@@ -743,9 +744,8 @@ function subscribeToStream<A>(
 			}),
 		);
 
-		// Fork and run the effect through the runtime
-		// This runs the stream in the background
-		context.runtime.runFork(effect);
+		// Fork the effect in the scope so it's automatically interrupted when scope closes
+		yield* Effect.forkIn(effect, context.scope);
 
 		// Note: Stream runs in background via forked fiber
 		// This matches the AC1 requirement that Effect completes after initial render
@@ -784,9 +784,8 @@ function handleStreamChild(
 			);
 		});
 
-		// Fork and run the stream effect through the runtime
-		// This runs the stream in the background
-		context.runtime.runFork(effect);
+		// Fork the effect in the scope so it's automatically interrupted when scope closes
+		yield* Effect.forkIn(effect, context.scope);
 
 		// AC19: Return markers to be inserted
 		// Note: Content will be updated asynchronously by the daemon fiber

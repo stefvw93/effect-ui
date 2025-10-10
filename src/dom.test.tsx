@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
-import { Effect, Stream } from "effect";
+import { Effect, Schedule, Stream } from "effect";
 import { JSDOM } from "jsdom";
 import { mount } from "./dom";
 
@@ -1099,5 +1099,233 @@ describe("AC25: Scope Management", () => {
 		await waitForStream();
 
 		assert.ok(root.textContent?.includes("test"));
+	});
+});
+
+// ============================================================================
+// AC26: Cleanup and Unmount
+// ============================================================================
+
+describe("AC26: Cleanup and Unmount", () => {
+	it("should stop all stream emissions after unmount", async () => {
+		createTestDOM();
+		const root = createRoot();
+		let emissionCount = 0;
+
+		// Create a stream that emits periodically
+		// Use tap to track actual emissions to subscribers
+		const stream = Stream.make("initial").pipe(
+			Stream.concat(
+				Stream.make("delayed").pipe(
+					Stream.schedule(Schedule.spaced("200 millis")),
+				),
+			),
+			Stream.tap(() =>
+				Effect.sync(() => {
+					emissionCount++;
+				}),
+			),
+		);
+
+		const handle = await runMount(<div>{stream}</div>, root);
+
+		// Wait for initial emission
+		await waitForStream();
+		assert.equal(root.textContent, "initial");
+		const countAfterInitial = emissionCount;
+		assert.ok(countAfterInitial > 0, "Should have initial emission");
+
+		// Unmount before delayed emission
+		await Effect.runPromise(handle.unmount());
+
+		// Wait for what would be the delayed emission
+		await waitFor(300);
+
+		// The delayed emission should NOT have occurred
+		assert.equal(
+			emissionCount,
+			countAfterInitial,
+			"Stream should not emit after unmount",
+		);
+		assert.equal(
+			root.textContent,
+			"initial",
+			"Content should not change after unmount",
+		);
+	});
+
+	it("should cancel all running stream subscriptions on unmount", async () => {
+		createTestDOM();
+		const root = createRoot();
+		let streamEmissionCount = 0;
+		let attributeEmissionCount = 0;
+		let styleEmissionCount = 0;
+
+		// Create streams that track emissions
+		const childStream = Stream.make("child1", "child2").pipe(
+			Stream.tap(() =>
+				Effect.sync(() => {
+					streamEmissionCount++;
+				}),
+			),
+		);
+
+		const attrStream = Stream.make("attr1", "attr2").pipe(
+			Stream.tap(() =>
+				Effect.sync(() => {
+					attributeEmissionCount++;
+				}),
+			),
+		);
+
+		const styleStream = Stream.make({ color: "red" }, { color: "blue" }).pipe(
+			Stream.tap(() =>
+				Effect.sync(() => {
+					styleEmissionCount++;
+				}),
+			),
+		);
+
+		const handle = await runMount(
+			<div data-test={attrStream} style={styleStream}>
+				{childStream}
+			</div>,
+			root,
+		);
+
+		// Give streams time to emit initial values
+		await waitForStream();
+
+		// Record initial counts
+		const initialStreamCount = streamEmissionCount;
+		const initialAttrCount = attributeEmissionCount;
+		const initialStyleCount = styleEmissionCount;
+
+		// Unmount
+		await Effect.runPromise(handle.unmount());
+
+		// Try to trigger more emissions (shouldn't work)
+		await waitFor(200);
+
+		// Counts should not have increased after unmount
+		assert.equal(
+			streamEmissionCount,
+			initialStreamCount,
+			"Child stream should stop",
+		);
+		assert.equal(
+			attributeEmissionCount,
+			initialAttrCount,
+			"Attribute stream should stop",
+		);
+		assert.equal(
+			styleEmissionCount,
+			initialStyleCount,
+			"Style stream should stop",
+		);
+	});
+
+	it("should properly dispose multiple nested runtimes", async () => {
+		createTestDOM();
+		const root1 = createRoot();
+		const root2 = document.createElement("div");
+		document.body.appendChild(root2);
+
+		// Mount two separate apps with streams
+		const handle1 = await runMount(<div>{Stream.make("app1")}</div>, root1);
+
+		const handle2 = await runMount(<div>{Stream.make("app2")}</div>, root2);
+
+		await waitForStream();
+		assert.equal(root1.textContent, "app1");
+		assert.equal(root2.textContent, "app2");
+
+		// Unmount first app
+		await Effect.runPromise(handle1.unmount());
+
+		// Second app should still work
+		assert.equal(root2.textContent, "app2");
+
+		// Unmount second app
+		await Effect.runPromise(handle2.unmount());
+
+		// Both should be unmounted now
+		await waitFor(100);
+		assert.ok(true, "Both apps unmounted successfully");
+	});
+
+	it("should handle rapid mount/unmount cycles", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		// Perform multiple rapid mount/unmount cycles
+		for (let i = 0; i < 5; i++) {
+			const handle = await runMount(
+				<div>{Stream.make(`cycle-${i}`)}</div>,
+				root,
+			);
+
+			await waitFor(10);
+			await Effect.runPromise(handle.unmount());
+		}
+
+		// Final mount
+		const finalHandle = await runMount(<div>{Stream.make("final")}</div>, root);
+
+		await waitForStream();
+		assert.equal(root.textContent, "final");
+
+		// Clean up
+		await Effect.runPromise(finalHandle.unmount());
+	});
+
+	it("should make unmount idempotent", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const handle = await runMount(<div>test</div>, root);
+
+		// Unmount multiple times - should not error
+		await Effect.runPromise(handle.unmount());
+		await Effect.runPromise(handle.unmount());
+		await Effect.runPromise(handle.unmount());
+
+		assert.ok(true, "Multiple unmounts did not cause errors");
+	});
+
+	it("should cancel long-running async streams on unmount", async () => {
+		createTestDOM();
+		const root = createRoot();
+		const emissions: number[] = [];
+
+		// Create a stream that emits numbers over time
+		const numberStream = Stream.iterate(0, (n) => n + 1).pipe(
+			Stream.tap((n) => Effect.sync(() => emissions.push(n))),
+			Stream.schedule(Schedule.spaced("50 millis")),
+			Stream.take(10), // Would emit 10 items if not cancelled
+			Stream.map((n) => String(n)), // Convert to string for rendering
+		);
+
+		const handle = await runMount(<div>{numberStream}</div>, root);
+
+		// Wait for a couple emissions
+		await waitFor(120);
+
+		const emissionsBeforeUnmount = emissions.length;
+		assert.ok(emissionsBeforeUnmount > 0, "Should have some emissions");
+		assert.ok(emissionsBeforeUnmount < 10, "Should not have all emissions yet");
+
+		// Unmount to cancel the stream
+		await Effect.runPromise(handle.unmount());
+
+		// Wait for what would be more emissions
+		await waitFor(500);
+
+		// No new emissions should have occurred
+		assert.equal(
+			emissions.length,
+			emissionsBeforeUnmount,
+			"Stream should stop emitting after unmount",
+		);
 	});
 });
