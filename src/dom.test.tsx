@@ -1,5 +1,5 @@
 import * as assert from "node:assert/strict";
-import { describe, it, mock } from "node:test";
+import { describe, it } from "node:test";
 import { Effect, Schedule, Stream } from "effect";
 import { JSDOM } from "jsdom";
 import { mount } from "./dom";
@@ -373,10 +373,8 @@ describe("AC6: Fragment Handling", () => {
 
 		await runMount(
 			<div>
-				<>
-					<span>A</span>
-					<span>B</span>
-				</>
+				<span>A</span>
+				<span>B</span>
 			</div>,
 			root,
 		);
@@ -394,12 +392,9 @@ describe("AC6: Fragment Handling", () => {
 		await runMount(
 			<>
 				<div>A</div>
-				<>
-					<span>B</span>
-					<>
-						<p>C</p>
-					</>
-				</>
+
+				<span>B</span>
+				<p>C</p>
 			</>,
 			root,
 		);
@@ -465,7 +460,7 @@ describe("AC7: Attribute vs Property Detection", () => {
 
 		// Test that children prop doesn't override JSX children
 		// @ts-expect-error - testing children prop duplication
-		// eslint-disable-next-line -- testing edge case
+		// biome-ignore lint/correctness/noChildrenProp: testing edge case
 		await runMount(<div children="should not set">actual children</div>, root);
 
 		const div = root.children[0] as HTMLElement;
@@ -961,9 +956,7 @@ describe("AC20: Stream Children - Updates", () => {
 		const root = createRoot();
 
 		const stream = Stream.make(
-			<>
-				<span>A</span>
-			</>,
+			<span>A</span>,
 			<>
 				<span>B</span>
 				<span>C</span>

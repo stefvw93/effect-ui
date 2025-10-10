@@ -32,6 +32,8 @@ pnpm lint            # Check code with Biome
 pnpm lint.fix        # Auto-fix linting issues
 ```
 
+**Important:** This project uses Biome for linting and formatting, NOT ESLint. Always use Biome commands and configuration. When adding lint ignore comments, use Biome's syntax (e.g., `// biome-ignore lint/...` not `// eslint-disable`).
+
 ## Architecture
 
 ### TypeScript Configuration
@@ -50,11 +52,17 @@ Path aliases:
 
 ### Code Style
 
+**Linting Tool:** This project uses Biome (NOT ESLint) for all linting and formatting.
+
 Biome enforces:
 - Tab indentation
 - Double quotes for strings
 - Automatic import organization
 - Recommended linting rules
+
+When ignoring lint rules, use Biome syntax:
+- ✅ Correct: `// biome-ignore lint/correctness/noChildrenProp: testing edge case`
+- ❌ Wrong: `// eslint-disable-next-line`
 
 ### Project Structure
 
