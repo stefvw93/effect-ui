@@ -11,6 +11,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsdown",
+		"dev": "vite playground --config vite.config.ts",
 		"lint": "biome check",
 		"lint.fix": "biome check --write",
 		"test": "node --import tsx --test src/**/*.test.{ts,tsx}",
@@ -21,10 +22,12 @@
 		"@biomejs/biome": "2.2.5",
 		"@types/jsdom": "^27.0.0",
 		"@types/node": "^24.7.0",
+		"@vitejs/plugin-react": "^5.0.4",
 		"jsdom": "^27.0.0",
 		"tsdown": "^0.15.6",
 		"tsx": "^4.20.6",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"vite": "^7.1.9"
 	},
 	"dependencies": {
 		"effect": "^3.18.4",

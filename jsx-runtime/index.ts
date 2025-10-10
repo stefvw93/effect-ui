@@ -25,16 +25,31 @@ export type PropsWithChildren<T = object> = T & {
 
 export function jsx(
 	type: JSXType,
-	props: PropsWithChildren<{ [key: string]: unknown }>,
+	props: PropsWithChildren<{ [key: string]: unknown }> | null,
+	...children: JSXNode[]
 ): JSXNode {
-	return { type, props };
+	// Handle the classic JSX transform where children are passed as additional arguments
+	const normalizedProps = props ?? {};
+
+	// If children are passed as arguments (classic transform), add them to props
+	if (children.length > 0) {
+		return {
+			type,
+			props: {
+				...normalizedProps,
+				children: children.length === 1 ? children[0] : children
+			}
+		};
+	}
+
+	// Otherwise use children from props (automatic transform)
+	return { type, props: normalizedProps };
 }
 
 export const jsxs: typeof jsx = jsx;
 
-export function Fragment({ children }: { children?: JSXNode[] }): JSXNode {
-	return jsx(FRAGMENT, { children });
-}
+// Fragment needs to be the symbol directly for esbuild
+export const Fragment = FRAGMENT;
 
 // this declaration allows us to augment JSX interfaces
 declare module "html-jsx" {
