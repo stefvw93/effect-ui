@@ -189,10 +189,7 @@ function nextStreamId(): Effect.Effect<number, never, RenderContext> {
  */
 function isStream(value: unknown): value is Stream.Stream<unknown> {
 	return (
-		typeof value === "object" &&
-		value !== null &&
-		"channel" in value &&
-		typeof (value as { channel: unknown }).channel === "object"
+		typeof value === "object" && value != null && Stream.StreamTypeId in value
 	);
 }
 
