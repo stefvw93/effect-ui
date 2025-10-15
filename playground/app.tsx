@@ -8,7 +8,7 @@ import { mount } from "../src/dom";
 function Counter() {
 	// Create a stream that emits incrementing numbers every second
 	const counterStream = Stream.iterate(0, (n) => n + 1).pipe(
-		Stream.schedule(Schedule.spaced(1000)),
+		Stream.schedule(Schedule.spaced(1000).pipe(Schedule.union(Schedule.once))),
 		Stream.take(60), // Stop after 60 seconds
 	);
 
