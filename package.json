@@ -21,13 +21,13 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.2.5",
 		"@types/jsdom": "^27.0.0",
-		"@types/node": "^24.7.1",
+		"@types/node": "^24.8.1",
 		"@vitejs/plugin-react": "^5.0.4",
 		"jsdom": "^27.0.0",
-		"tsdown": "^0.15.6",
+		"tsdown": "^0.15.8",
 		"tsx": "^4.20.6",
 		"typescript": "^5.9.3",
-		"vite": "^7.1.9"
+		"vite": "^7.1.11"
 	},
 	"dependencies": {
 		"effect": "^3.18.4",
