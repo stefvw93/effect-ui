@@ -30,7 +30,7 @@
 		"vite": "^7.1.9"
 	},
 	"dependencies": {
-		"effect": "^3.18.4",
+		"effect": "^3.19.3",
 		"html-jsx": "^1.0.0"
 	}
 }
