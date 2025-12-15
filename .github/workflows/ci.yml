@@ -75,7 +75,7 @@ jobs:
 
       # Optional: Upload build artifacts
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: matrix.os == 'ubuntu-latest'
         with:
           name: build-output-node-${{ matrix.node-version }}
