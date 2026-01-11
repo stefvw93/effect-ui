@@ -1,5 +1,5 @@
 import { Effect, Exit, Layer, ManagedRuntime, Scope } from "effect";
-import type { JSXChild } from "./jsx-runtime/values";
+import type { JSXChild } from "./jsx-runtime/types/values";
 import { RenderContext, renderNode } from "./render-core";
 import type {
 	InvalidElementTypeError,

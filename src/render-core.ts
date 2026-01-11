@@ -7,7 +7,7 @@ import {
 } from "effect";
 import { setElementProps } from "./dom";
 import { FRAGMENT } from "./jsx-runtime";
-import type { JSXChild } from "./jsx-runtime/values";
+import type { JSXChild } from "./jsx-runtime/types/values";
 import {
 	InvalidElementTypeError,
 	type RenderError,

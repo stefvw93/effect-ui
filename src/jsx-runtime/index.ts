@@ -1,6 +1,6 @@
-import type { HTMLElements } from "./html";
-import type { SVGElements } from "./svg";
-import type { JSXChild, JSXType } from "./values";
+import type { HTMLElements } from "./types/html";
+import type { SVGElements } from "./types/svg";
+import type { JSXChild, JSXType } from "./types/values";
 
 export const FRAGMENT = Symbol("effect-ui/jsx-runtime/fragment");
 
