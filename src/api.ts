@@ -4,10 +4,10 @@ import {
 	type MountHandle,
 	RenderContext,
 	type RenderError,
-	renderNode,
 	type StreamSubscriptionError,
 } from "./dom";
 import type { JSXNode } from "./jsx-runtime";
+import { renderNode } from "./render-core";
 
 /**
  * Mounts a JSX tree to a DOM element with full reactive support.
