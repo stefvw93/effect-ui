@@ -2,10 +2,9 @@ import {
 	Context,
 	Data,
 	Effect,
-	Exit,
 	Layer,
 	ManagedRuntime,
-	Scope,
+	type Scope,
 	Stream,
 } from "effect";
 import type { JSXNode } from "@/jsx-runtime";
@@ -18,7 +17,9 @@ import { FRAGMENT } from "@/jsx-runtime";
 /**
  * Error thrown when JSXNode has invalid type (not string, FRAGMENT, or function)
  */
-export class InvalidElementType extends Data.TaggedError("InvalidElementType")<{
+export class InvalidElementTypeError extends Data.TaggedError(
+	"InvalidElementTypeError",
+)<{
 	readonly type: unknown;
 	readonly message: string;
 }> {}
@@ -78,92 +79,6 @@ export interface MountHandle {
 	unmount(): Effect.Effect<void>;
 }
 
-/**
- * Mounts a JSX tree to a DOM element with full reactive support.
- *
- * - Clears the root element's existing children
- * - Renders the JSX tree to DOM nodes
- * - Sets up reactive subscriptions for Stream/Effect values
- * - Returns Effect that completes after initial render (streams run in background)
- * - Creates a fresh ManagedRuntime per mount
- * - Returns a cleanup handle to unmount and dispose resources
- *
- * @param app - JSX tree to render
- * @param root - HTMLElement to mount to
- * @returns Effect that yields MountHandle for cleanup
- *
- * @example
- * ```tsx
- * const app = <div>Hello World</div>;
- * const root = document.getElementById("root")!;
- * const handle = await Effect.runPromise(mount(app, root));
- * // Later: cleanup
- * await Effect.runPromise(handle.unmount());
- * ```
- */
-export function mount(
-	app: JSXNode,
-	root: HTMLElement,
-): Effect.Effect<
-	MountHandle,
-	InvalidElementType | StreamSubscriptionError | RenderError
-> {
-	return Effect.gen(function* () {
-		// AC24: Create fresh ManagedRuntime per mount
-		const runtime = createMountRuntime();
-		const scope = yield* Scope.make();
-
-		// Create the RenderContext service implementation
-		const context = {
-			runtime,
-			scope,
-			streamIdCounter: { current: 0 },
-		};
-
-		// AC1: Clear root element's existing children
-		root.innerHTML = "";
-
-		// AC1: Render the JSX tree with the provided context
-		const result = yield* renderNode(app).pipe(
-			Effect.provideService(RenderContext, context),
-		);
-
-		// AC1: Append rendered nodes to root
-		if (result !== null) {
-			if (Array.isArray(result)) {
-				for (const node of result) {
-					root.appendChild(node);
-				}
-			} else {
-				root.appendChild(result as Node);
-			}
-		}
-
-		// AC27: Return cleanup handle
-		// Track if already unmounted for idempotency
-		let unmounted = false;
-
-		return {
-			unmount: () =>
-				Effect.gen(function* () {
-					// AC27: Make unmount idempotent
-					if (unmounted) {
-						return;
-					}
-					unmounted = true;
-
-					// AC26: Close scope to cancel all running streams
-					// All fibers forked with Effect.forkIn will be automatically interrupted
-					yield* Scope.close(scope, Exit.void);
-
-					// AC26: Dispose the ManagedRuntime
-					// ManagedRuntime.dispose returns a Promise, so we need to wrap it
-					yield* Effect.promise(() => runtime.dispose());
-				}),
-		};
-	});
-}
-
 // ============================================================================
 // Utility Functions
 // ============================================================================
@@ -171,7 +86,10 @@ export function mount(
 /**
  * Creates a fresh ManagedRuntime for a mount operation
  */
-function createMountRuntime(): ManagedRuntime.ManagedRuntime<never, never> {
+export function createMountRuntime(): ManagedRuntime.ManagedRuntime<
+	never,
+	never
+> {
 	return ManagedRuntime.make(Layer.empty as Layer.Layer<never, never>);
 }
 
@@ -217,11 +135,11 @@ function normalizeToStream<A>(
  * Main rendering function that converts JSXNode to DOM nodes.
  * Handles all JSXNode types and sets up reactive subscriptions.
  */
-function renderNode(
+export function renderNode(
 	node: JSXNode,
 ): Effect.Effect<
 	RenderResult,
-	InvalidElementType | StreamSubscriptionError | RenderError,
+	InvalidElementTypeError | StreamSubscriptionError | RenderError,
 	RenderContext
 > {
 	return Effect.gen(function* () {
@@ -287,7 +205,7 @@ function renderNode(
 
 			// AC23: Invalid element type
 			return yield* Effect.fail(
-				new InvalidElementType({
+				new InvalidElementTypeError({
 					type,
 					message: `Invalid JSXNode type: expected string, FRAGMENT, or function, got ${typeof type}`,
 				}),
@@ -337,7 +255,7 @@ function renderChildren(
 	children: readonly JSXNode[],
 ): Effect.Effect<
 	readonly Node[],
-	InvalidElementType | StreamSubscriptionError | RenderError,
+	InvalidElementTypeError | StreamSubscriptionError | RenderError,
 	RenderContext
 > {
 	return Effect.gen(function* () {
@@ -374,7 +292,7 @@ function renderFragment(
 	props: object,
 ): Effect.Effect<
 	readonly Node[],
-	InvalidElementType | StreamSubscriptionError | RenderError,
+	InvalidElementTypeError | StreamSubscriptionError | RenderError,
 	RenderContext
 > {
 	return Effect.gen(function* () {
@@ -397,7 +315,7 @@ function renderElement(
 	props: object,
 ): Effect.Effect<
 	HTMLElement,
-	InvalidElementType | StreamSubscriptionError | RenderError,
+	InvalidElementTypeError | StreamSubscriptionError | RenderError,
 	RenderContext
 > {
 	return Effect.gen(function* () {
@@ -448,7 +366,7 @@ function renderComponent(
 	props: object,
 ): Effect.Effect<
 	RenderResult,
-	InvalidElementType | StreamSubscriptionError | RenderError,
+	InvalidElementTypeError | StreamSubscriptionError | RenderError,
 	RenderContext
 > {
 	return Effect.gen(function* () {
@@ -765,7 +683,7 @@ function handleStreamChild(
 	_parent: HTMLElement | DocumentFragment,
 ): Effect.Effect<
 	readonly Node[],
-	StreamSubscriptionError | RenderError | InvalidElementType,
+	StreamSubscriptionError | RenderError | InvalidElementTypeError,
 	RenderContext
 > {
 	return Effect.gen(function* () {
@@ -811,7 +729,7 @@ function updateStreamChild(
 	newNode: JSXNode,
 ): Effect.Effect<
 	void,
-	InvalidElementType | StreamSubscriptionError | RenderError,
+	InvalidElementTypeError | StreamSubscriptionError | RenderError,
 	RenderContext
 > {
 	return Effect.gen(function* () {

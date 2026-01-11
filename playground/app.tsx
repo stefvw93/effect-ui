@@ -1,5 +1,5 @@
 import { Effect, Schedule, Stream } from "effect";
-import { mount } from "../src/dom";
+import { mount } from "@/api";
 
 // ============================================================================
 // Example 1: Basic Counter with Streams
