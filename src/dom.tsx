@@ -9,6 +9,7 @@ import {
 } from "effect";
 import type { JSXNode } from "@/jsx-runtime";
 import { FRAGMENT } from "@/jsx-runtime";
+import { isStream, nextStreamId } from "./utilities";
 
 // ============================================================================
 // Error Types
@@ -77,29 +78,6 @@ export interface MountHandle {
 	 * Safe to call multiple times (idempotent).
 	 */
 	unmount(): Effect.Effect<void>;
-}
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
-/**
- * Generates next unique stream ID
- */
-function nextStreamId(): Effect.Effect<number, never, RenderContext> {
-	return Effect.gen(function* () {
-		const context = yield* RenderContext;
-		return ++context.streamIdCounter.current;
-	});
-}
-
-/**
- * Checks if value is a Stream
- */
-function isStream(value: unknown): value is Stream.Stream<unknown> {
-	return (
-		typeof value === "object" && value != null && Stream.StreamTypeId in value
-	);
 }
 
 /**
