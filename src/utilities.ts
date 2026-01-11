@@ -19,3 +19,18 @@ export function isStream(value: unknown): value is Stream.Stream<unknown> {
 		typeof value === "object" && value != null && Stream.StreamTypeId in value
 	);
 }
+
+/**
+ * Normalizes Effect/Stream to Stream
+ */
+export function normalizeToStream<A>(
+	value: A | Effect.Effect<A> | Stream.Stream<A>,
+): Stream.Stream<A> {
+	if (isStream(value)) {
+		return value;
+	}
+	if (Effect.isEffect(value)) {
+		return Stream.fromEffect(value);
+	}
+	return Stream.make(value);
+}

@@ -9,7 +9,7 @@ import {
 } from "effect";
 import type { JSXNode } from "@/jsx-runtime";
 import { FRAGMENT } from "@/jsx-runtime";
-import { isStream, nextStreamId } from "./utilities";
+import { isStream, nextStreamId, normalizeToStream } from "./utilities";
 
 // ============================================================================
 // Error Types
@@ -78,21 +78,6 @@ export interface MountHandle {
 	 * Safe to call multiple times (idempotent).
 	 */
 	unmount(): Effect.Effect<void>;
-}
-
-/**
- * Normalizes Effect/Stream to Stream
- */
-function normalizeToStream<A>(
-	value: A | Effect.Effect<A> | Stream.Stream<A>,
-): Stream.Stream<A> {
-	if (isStream(value)) {
-		return value;
-	}
-	if (Effect.isEffect(value)) {
-		return Stream.fromEffect(value);
-	}
-	return Stream.make(value);
 }
 
 // ============================================================================
