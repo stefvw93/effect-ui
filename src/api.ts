@@ -1,13 +1,12 @@
 import { Effect, Exit, Layer, ManagedRuntime, Scope } from "effect";
-import {
-	type InvalidElementTypeError,
-	type MountHandle,
-	RenderContext,
-	type RenderError,
-	type StreamSubscriptionError,
+import type {
+	InvalidElementTypeError,
+	MountHandle,
+	RenderError,
+	StreamSubscriptionError,
 } from "./dom";
 import type { JSXNode } from "./jsx-runtime";
-import { renderNode } from "./render-core";
+import { RenderContext, renderNode } from "./render-core";
 
 /**
  * Mounts a JSX tree to a DOM element with full reactive support.

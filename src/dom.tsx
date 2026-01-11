@@ -1,14 +1,6 @@
-import {
-	Context,
-	Data,
-	Effect,
-	Layer,
-	type ManagedRuntime,
-	type Scope,
-	Stream,
-} from "effect";
+import { Data, Effect, Stream } from "effect";
 import type { JSXNode } from "@/jsx-runtime";
-import { renderNode } from "./render-core";
+import { RenderContext, renderNode } from "./render-core";
 import { isStream, nextStreamId, normalizeToStream } from "./utilities";
 
 // ============================================================================
@@ -42,22 +34,6 @@ export class RenderError extends Data.TaggedError("RenderError")<{
 	readonly cause: unknown;
 	readonly message: string;
 }> {}
-
-// ============================================================================
-// Services
-// ============================================================================
-
-/**
- * Service for managing rendering context including runtime, scope, and stream IDs
- */
-export class RenderContext extends Context.Tag("RenderContext")<
-	RenderContext,
-	{
-		readonly runtime: ManagedRuntime.ManagedRuntime<never, never>;
-		readonly scope: Scope.Scope;
-		readonly streamIdCounter: { current: number };
-	}
->() {}
 
 /**
  * Result of rendering a JSXNode - can be single node, multiple nodes, or null
