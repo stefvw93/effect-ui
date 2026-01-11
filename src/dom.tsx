@@ -35,11 +35,6 @@ export class RenderError extends Data.TaggedError("RenderError")<{
 	readonly message: string;
 }> {}
 
-/**
- * Result of rendering a JSXNode - can be single node, multiple nodes, or null
- */
-export type RenderResult = Node | readonly Node[] | null;
-
 // ============================================================================
 // Public API
 // ============================================================================

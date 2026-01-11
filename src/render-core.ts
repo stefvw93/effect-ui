@@ -9,7 +9,6 @@ import {
 	handleStreamChild,
 	InvalidElementTypeError,
 	type RenderError,
-	type RenderResult,
 	type StreamSubscriptionError,
 	setElementProps,
 } from "./dom";
@@ -287,3 +286,8 @@ export class RenderContext extends Context.Tag("RenderContext")<
 		readonly streamIdCounter: { current: number };
 	}
 >() {}
+/**
+ * Result of rendering a JSXNode - can be single node, multiple nodes, or null
+ */
+
+export type RenderResult = Node | readonly Node[] | null;
