@@ -1,5 +1,6 @@
 import type * as CSS from "csstype";
 import type { Effect, Stream } from "effect";
+import type { FRAGMENT } from "@/jsx-runtime";
 
 export type AttributeValue<T> =
 	| T
@@ -24,7 +25,7 @@ export type StyleAttributeValue =
 	| Effect.Effect<string> // Effect of style string
 	| Effect.Effect<StreamableStyleObject>; // Effect of style objectexport type JSXType = typeof FRAGMENT |
 
-export type JSXNode =
+export type JSXChild =
 	// biome-ignore lint/suspicious/noConfusingVoidType: convenient way to represent void nodes
 	| void
 	| null
@@ -33,7 +34,12 @@ export type JSXNode =
 	| number
 	| bigint
 	| boolean
-	| Iterable<JSXNode>
-	| Stream.Stream<JSXNode>
-	| Effect.Effect<JSXNode>
+	| Iterable<JSXChild>
+	| Stream.Stream<JSXChild>
+	| Effect.Effect<JSXChild>
 	| { type: JSXType; props: Record<string, unknown> };
+
+export type JSXType =
+	| typeof FRAGMENT
+	| string
+	| ((props: Record<string, unknown>) => JSXChild);

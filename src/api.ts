@@ -1,5 +1,5 @@
 import { Effect, Exit, Layer, ManagedRuntime, Scope } from "effect";
-import type { JSXNode } from "./jsx-runtime/values";
+import type { JSXChild } from "./jsx-runtime/values";
 import { RenderContext, renderNode } from "./render-core";
 import type {
 	InvalidElementTypeError,
@@ -32,7 +32,7 @@ import type {
  */
 
 export function mount(
-	app: JSXNode,
+	app: JSXChild,
 	root: HTMLElement,
 ): Effect.Effect<
 	MountHandle,

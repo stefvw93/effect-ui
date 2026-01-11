@@ -1,19 +1,14 @@
 import type { HTMLElements } from "./html";
 import type { SVGElements } from "./svg";
-import type { JSXNode } from "./values";
+import type { JSXChild, JSXType } from "./values";
 
 export const FRAGMENT = Symbol("effect-ui/jsx-runtime/fragment");
 
-export type JSXType =
-	| typeof FRAGMENT
-	| string
-	| ((props: Record<string, unknown>) => JSXNode);
-
 export function jsx(
 	type: JSXType,
-	props: { [key: string]: unknown; children?: JSXNode | JSXNode[] } | null,
-	...children: JSXNode[]
-): JSXNode {
+	props: { [key: string]: unknown; children?: JSXChild | JSXChild[] } | null,
+	...children: JSXChild[]
+): JSXChild {
 	// Handle the classic JSX transform where children are passed as additional arguments
 	const normalizedProps = props ?? {};
 
@@ -36,14 +31,13 @@ export const jsxs: typeof jsx = jsx;
 
 export const Fragment = FRAGMENT;
 
-export declare namespace JSX {
-	type Element = JSXNode;
+declare global {
+	namespace JSX {
+		type Element = JSXChild;
 
-	interface IntrinsicElements extends HTMLElements, SVGElements {}
+		interface IntrinsicElements extends HTMLElements, SVGElements {}
 
-	// interface IntrinsicAttributes {}
-
-	interface ElementChildrenAttribute {
-		children: {};
+		// interface IntrinsicAttributes {}
+		// interface ElementChildrenAttribute {}
 	}
 }

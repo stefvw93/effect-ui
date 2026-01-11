@@ -1,6 +1,5 @@
-import type { StandardProperties as CSSProperties } from "csstype";
 import type { DOMAttributes } from "./dom";
-import type { AttributeValue, StyleAttributeValue } from "./values";
+import type { AttributeValue, JSXChild, StyleAttributeValue } from "./values";
 
 type SVGPreserveAspectRatio =
 	| "none"
@@ -63,6 +62,7 @@ type ImagePreserveAspectRatio =
 	| "defer xMaxYMax slice";
 type SVGUnits = "userSpaceOnUse" | "objectBoundingBox";
 export interface SVGAttributes<T> extends DOMAttributes<T> {
+	children?: AttributeValue<JSXChild>;
 	id?: AttributeValue<string>;
 	lang?: AttributeValue<string>;
 	/**
