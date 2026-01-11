@@ -1,7 +1,6 @@
 import { Data, Effect, Stream } from "effect";
-import type { JSXNode } from "@/jsx-runtime";
-import { RenderContext, renderNode } from "./render-core";
-import { isStream, nextStreamId, normalizeToStream } from "./utilities";
+import { RenderContext } from "./render-core";
+import { isStream, normalizeToStream } from "./utilities";
 
 // ============================================================================
 // Error Types
@@ -329,103 +328,4 @@ function subscribeToStream<A>(
 		// This matches the AC1 requirement that Effect completes after initial render
 		// and streams run in background
 	});
-}
-
-// ============================================================================
-// Reactive Children Handling
-// ============================================================================
-
-/**
- * Handles a child that is a Stream by setting up comment markers and subscriptions
- */
-export function handleStreamChild(
-	stream: Stream.Stream<JSXNode>,
-	_parent: HTMLElement | DocumentFragment,
-): Effect.Effect<
-	readonly Node[],
-	StreamSubscriptionError | RenderError | InvalidElementTypeError,
-	RenderContext
-> {
-	return Effect.gen(function* () {
-		const context = yield* RenderContext;
-
-		// AC19: Create comment markers
-		const streamId = yield* nextStreamId();
-		const [startMarker, endMarker] = createStreamMarkers(streamId);
-
-		// AC20: Set up subscription to update content through the runtime
-		const effect = Stream.runForEach(stream, (value) => {
-			// Update the stream child for each emission
-			// Need to provide the context to updateStreamChild
-			return updateStreamChild(startMarker, endMarker, value).pipe(
-				Effect.provideService(RenderContext, context),
-			);
-		});
-
-		// Fork the effect in the scope so it's automatically interrupted when scope closes
-		yield* Effect.forkIn(effect, context.scope);
-
-		// AC19: Return markers to be inserted
-		// Note: Content will be updated asynchronously by the daemon fiber
-		return [startMarker, endMarker];
-	});
-}
-
-/**
- * Creates start and end comment markers for stream child
- */
-function createStreamMarkers(streamId: number): readonly [Comment, Comment] {
-	const startMarker = document.createComment(` stream-start-${streamId} `);
-	const endMarker = document.createComment(` stream-end-${streamId} `);
-	return [startMarker, endMarker];
-}
-
-/**
- * Updates stream child content between markers
- */
-function updateStreamChild(
-	startMarker: Comment,
-	endMarker: Comment,
-	newNode: JSXNode,
-): Effect.Effect<
-	void,
-	InvalidElementTypeError | StreamSubscriptionError | RenderError,
-	RenderContext
-> {
-	return Effect.gen(function* () {
-		// AC20: Remove all nodes between markers
-		removeNodesBetweenMarkers(startMarker, endMarker);
-
-		// AC20: Render new node
-		const result = yield* renderNode(newNode);
-
-		// AC20: Insert new nodes between markers
-		const parent = startMarker.parentNode;
-		if (parent !== null) {
-			if (result !== null) {
-				if (Array.isArray(result)) {
-					for (const node of result) {
-						parent.insertBefore(node, endMarker);
-					}
-				} else {
-					parent.insertBefore(result as Node, endMarker);
-				}
-			}
-		}
-	});
-}
-
-/**
- * Removes all nodes between start and end markers
- */
-function removeNodesBetweenMarkers(
-	startMarker: Comment,
-	endMarker: Comment,
-): void {
-	let current = startMarker.nextSibling;
-	while (current !== null && current !== endMarker) {
-		const next = current.nextSibling;
-		current.remove();
-		current = next;
-	}
 }

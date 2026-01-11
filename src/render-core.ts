@@ -3,17 +3,16 @@ import {
 	Effect,
 	type ManagedRuntime,
 	type Scope,
-	type Stream,
+	Stream,
 } from "effect";
 import {
-	handleStreamChild,
 	InvalidElementTypeError,
 	type RenderError,
 	type StreamSubscriptionError,
 	setElementProps,
 } from "./dom";
 import { FRAGMENT, type JSXNode } from "./jsx-runtime";
-import { isStream, normalizeToStream } from "./utilities";
+import { isStream, nextStreamId, normalizeToStream } from "./utilities";
 
 /**
  * Main rendering function that converts JSXNode to DOM nodes.
@@ -104,7 +103,7 @@ export function renderNode(
 /**
  * Flattens iterable children recursively
  */
-export function flattenChildren(node: JSXNode): readonly JSXNode[] {
+function flattenChildren(node: JSXNode): readonly JSXNode[] {
 	const result: JSXNode[] = [];
 
 	function flatten(item: JSXNode): void {
@@ -135,7 +134,7 @@ export function flattenChildren(node: JSXNode): readonly JSXNode[] {
 /**
  * Renders an array of children nodes
  */
-export function renderChildren(
+function renderChildren(
 	children: readonly JSXNode[],
 ): Effect.Effect<
 	readonly Node[],
@@ -172,7 +171,7 @@ export function renderChildren(
 /**
  * Renders a fragment JSXNode (type: FRAGMENT)
  */
-export function renderFragment(
+function renderFragment(
 	props: object,
 ): Effect.Effect<
 	readonly Node[],
@@ -194,7 +193,7 @@ export function renderFragment(
 /**
  * Renders an element JSXNode (type: string)
  */
-export function renderElement(
+function renderElement(
 	type: string,
 	props: object,
 ): Effect.Effect<
@@ -245,7 +244,7 @@ export function renderElement(
 /**
  * Renders a function component JSXNode (type: function)
  */
-export function renderComponent(
+function renderComponent(
 	component: (props: object) => JSXNode,
 	props: object,
 ): Effect.Effect<
@@ -286,8 +285,107 @@ export class RenderContext extends Context.Tag("RenderContext")<
 		readonly streamIdCounter: { current: number };
 	}
 >() {}
+
 /**
  * Result of rendering a JSXNode - can be single node, multiple nodes, or null
  */
+type RenderResult = Node | readonly Node[] | null;
 
-export type RenderResult = Node | readonly Node[] | null;
+// ============================================================================
+// Reactive Children Handling
+// ============================================================================
+
+/**
+ * Handles a child that is a Stream by setting up comment markers and subscriptions
+ */
+function handleStreamChild(
+	stream: Stream.Stream<JSXNode>,
+	_parent: HTMLElement | DocumentFragment,
+): Effect.Effect<
+	readonly Node[],
+	StreamSubscriptionError | RenderError | InvalidElementTypeError,
+	RenderContext
+> {
+	return Effect.gen(function* () {
+		const context = yield* RenderContext;
+
+		// AC19: Create comment markers
+		const streamId = yield* nextStreamId();
+		const [startMarker, endMarker] = createStreamMarkers(streamId);
+
+		// AC20: Set up subscription to update content through the runtime
+		const effect = Stream.runForEach(stream, (value) => {
+			// Update the stream child for each emission
+			// Need to provide the context to updateStreamChild
+			return updateStreamChild(startMarker, endMarker, value).pipe(
+				Effect.provideService(RenderContext, context),
+			);
+		});
+
+		// Fork the effect in the scope so it's automatically interrupted when scope closes
+		yield* Effect.forkIn(effect, context.scope);
+
+		// AC19: Return markers to be inserted
+		// Note: Content will be updated asynchronously by the daemon fiber
+		return [startMarker, endMarker];
+	});
+}
+
+/**
+ * Creates start and end comment markers for stream child
+ */
+function createStreamMarkers(streamId: number): readonly [Comment, Comment] {
+	const startMarker = document.createComment(` stream-start-${streamId} `);
+	const endMarker = document.createComment(` stream-end-${streamId} `);
+	return [startMarker, endMarker];
+}
+
+/**
+ * Updates stream child content between markers
+ */
+function updateStreamChild(
+	startMarker: Comment,
+	endMarker: Comment,
+	newNode: JSXNode,
+): Effect.Effect<
+	void,
+	InvalidElementTypeError | StreamSubscriptionError | RenderError,
+	RenderContext
+> {
+	return Effect.gen(function* () {
+		// AC20: Remove all nodes between markers
+		removeNodesBetweenMarkers(startMarker, endMarker);
+
+		// AC20: Render new node
+		const result = yield* renderNode(newNode);
+
+		// AC20: Insert new nodes between markers
+		const parent = startMarker.parentNode;
+		if (parent !== null) {
+			if (result !== null) {
+				if (Array.isArray(result)) {
+					for (const node of result) {
+						parent.insertBefore(node, endMarker);
+					}
+				} else {
+					parent.insertBefore(result as Node, endMarker);
+				}
+			}
+		}
+	});
+}
+
+/**
+ * Removes all nodes between start and end markers
+ */
+function removeNodesBetweenMarkers(
+	startMarker: Comment,
+	endMarker: Comment,
+): void {
+	let current = startMarker.nextSibling;
+	while (current !== null && current !== endMarker) {
+		const next = current.nextSibling;
+		current.remove();
+		current = next;
+	}
+}
