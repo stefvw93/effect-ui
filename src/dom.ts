@@ -35,22 +35,6 @@ export class RenderError extends Data.TaggedError("RenderError")<{
 }> {}
 
 // ============================================================================
-// Public API
-// ============================================================================
-
-/**
- * Cleanup handle returned from mount that allows unmounting
- */
-export interface MountHandle {
-	/**
-	 * Unmounts the rendered tree and cleans up all resources.
-	 * Returns an Effect that completes when cleanup is done.
-	 * Safe to call multiple times (idempotent).
-	 */
-	unmount(): Effect.Effect<void>;
-}
-
-// ============================================================================
 // Attribute/Property Handling
 // ============================================================================
 
