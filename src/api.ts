@@ -1,6 +1,5 @@
-import { Effect, Exit, Scope } from "effect";
+import { Effect, Exit, Layer, ManagedRuntime, Scope } from "effect";
 import {
-	createMountRuntime,
 	type InvalidElementTypeError,
 	type MountHandle,
 	RenderContext,
@@ -43,7 +42,7 @@ export function mount(
 > {
 	return Effect.gen(function* () {
 		// AC24: Create fresh ManagedRuntime per mount
-		const runtime = createMountRuntime();
+		const runtime = ManagedRuntime.make(Layer.empty);
 		const scope = yield* Scope.make();
 
 		// Create the RenderContext service implementation

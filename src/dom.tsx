@@ -3,7 +3,7 @@ import {
 	Data,
 	Effect,
 	Layer,
-	ManagedRuntime,
+	type ManagedRuntime,
 	type Scope,
 	Stream,
 } from "effect";
@@ -82,16 +82,6 @@ export interface MountHandle {
 // ============================================================================
 // Utility Functions
 // ============================================================================
-
-/**
- * Creates a fresh ManagedRuntime for a mount operation
- */
-export function createMountRuntime(): ManagedRuntime.ManagedRuntime<
-	never,
-	never
-> {
-	return ManagedRuntime.make(Layer.empty as Layer.Layer<never, never>);
-}
 
 /**
  * Generates next unique stream ID
