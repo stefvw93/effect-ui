@@ -5,13 +5,13 @@ import {
 	type Scope,
 	Stream,
 } from "effect";
+import { setElementProps } from "./dom";
+import { FRAGMENT, type JSXNode } from "./jsx-runtime";
 import {
 	InvalidElementTypeError,
 	type RenderError,
 	type StreamSubscriptionError,
-	setElementProps,
-} from "./dom";
-import { FRAGMENT, type JSXNode } from "./jsx-runtime";
+} from "./types";
 import { isStream, nextStreamId, normalizeToStream } from "./utilities";
 
 /**

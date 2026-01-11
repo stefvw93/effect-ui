@@ -1,11 +1,11 @@
 import { Effect, Exit, Layer, ManagedRuntime, Scope } from "effect";
+import type { JSXNode } from "./jsx-runtime";
+import { RenderContext, renderNode } from "./render-core";
 import type {
 	InvalidElementTypeError,
 	RenderError,
 	StreamSubscriptionError,
-} from "./dom";
-import type { JSXNode } from "./jsx-runtime";
-import { RenderContext, renderNode } from "./render-core";
+} from "./types";
 
 /**
  * Mounts a JSX tree to a DOM element with full reactive support.
