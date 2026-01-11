@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { Effect, Schedule, Stream } from "effect";
 import { JSDOM } from "jsdom";
-import { mount } from "./dom";
+import { mount } from "./api";
 
 // ============================================================================
 // Test Setup
