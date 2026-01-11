@@ -1,5 +1,6 @@
 import type { StandardProperties as CSSProperties } from "csstype";
 import type { DOMAttributes } from "./dom";
+import type { AttributeValue, StyleAttributeValue } from "./values";
 
 type SVGPreserveAspectRatio =
 	| "none"
@@ -62,63 +63,63 @@ type ImagePreserveAspectRatio =
 	| "defer xMaxYMax slice";
 type SVGUnits = "userSpaceOnUse" | "objectBoundingBox";
 export interface SVGAttributes<T> extends DOMAttributes<T> {
-	id?: string;
-	lang?: string;
+	id?: AttributeValue<string>;
+	lang?: AttributeValue<string>;
 	/**
 	 * A space-separated list of the part names of the element. Part names allows CSS to select and style specific elements in a shadow tree via the ::part pseudo-element.
 	 */
-	part?: string;
+	part?: AttributeValue<string>;
 	/**
 	 * An integer attribute indicating if the element can take input focus (is focusable), if it should participate to sequential keyboard navigation, and if so, at what position. It can take several values: a negative value means that the element should be focusable, but should not be reachable via sequential keyboard navigation; 0 means that the element should be focusable and reachable via sequential keyboard navigation, but its relative order is defined by the platform convention; a positive value means that the element should be focusable and reachable via sequential keyboard navigation; the order in which the elements are focused is the increasing value of the tabindex. If several elements share the same tabindex, their relative order follows their relative positions in the document.
 	 */
-	tabindex?: number | string;
+	tabindex?: AttributeValue<number | string>;
 }
 interface StylableSVGAttributes {
-	class?: string;
-	style?: Partial<CSSStyleDeclaration> | CSSProperties | string | false | null;
+	class?: AttributeValue<string>;
+	style?: AttributeValue<StyleAttributeValue>;
 }
 interface TransformableSVGAttributes {
-	transform?: string;
+	transform?: AttributeValue<string>;
 }
 interface ConditionalProcessingSVGAttributes {
-	requiredExtensions?: string;
-	requiredFeatures?: string;
-	systemLanguage?: string;
+	requiredExtensions?: AttributeValue<string>;
+	requiredFeatures?: AttributeValue<string>;
+	systemLanguage?: AttributeValue<string>;
 }
 interface ExternalResourceSVGAttributes {
-	externalResourcesRequired?: "true" | "false";
+	externalResourcesRequired?: AttributeValue<"true" | "false">;
 }
 interface AnimationTimingSVGAttributes {
-	begin?: number | string;
-	dur?: number | string;
-	end?: number | string;
-	min?: number | string;
-	max?: number | string;
-	restart?: "always" | "whenNotActive" | "never";
-	repeatCount?: number | string | "indefinite";
-	repeatDur?: number | string;
-	fill?: "freeze" | "remove";
+	begin?: AttributeValue<number | string>;
+	dur?: AttributeValue<number | string>;
+	end?: AttributeValue<number | string>;
+	min?: AttributeValue<number | string>;
+	max?: AttributeValue<number | string>;
+	restart?: AttributeValue<"always" | "whenNotActive" | "never">;
+	repeatCount?: AttributeValue<number | string | "indefinite">;
+	repeatDur?: AttributeValue<number | string>;
+	fill?: AttributeValue<"freeze" | "remove">;
 }
 interface AnimationValueSVGAttributes {
-	calcMode?: "discrete" | "linear" | "paced" | "spline";
-	values?: string;
-	keyTimes?: string;
-	keySplines?: string;
-	from?: number | string;
-	to?: number | string;
-	by?: number | string;
+	calcMode?: AttributeValue<"discrete" | "linear" | "paced" | "spline">;
+	values?: AttributeValue<string>;
+	keyTimes?: AttributeValue<string>;
+	keySplines?: AttributeValue<string>;
+	from?: AttributeValue<number | string>;
+	to?: AttributeValue<number | string>;
+	by?: AttributeValue<number | string>;
 }
 interface AnimationAdditionSVGAttributes {
-	attributeName?: string;
-	additive?: "replace" | "sum";
-	accumulate?: "none" | "sum";
+	attributeName?: AttributeValue<string>;
+	additive?: AttributeValue<"replace" | "sum">;
+	accumulate?: AttributeValue<"none" | "sum">;
 }
 interface AnimationAttributeTargetSVGAttributes {
-	attributeName?: string;
-	attributeType?: "CSS" | "XML" | "auto";
+	attributeName?: AttributeValue<string>;
+	attributeType?: AttributeValue<"CSS" | "XML" | "auto">;
 }
 interface PresentationSVGAttributes {
-	"alignment-baseline"?:
+	"alignment-baseline"?: AttributeValue<
 		| "auto"
 		| "baseline"
 		| "before-edge"
@@ -131,20 +132,27 @@ interface PresentationSVGAttributes {
 		| "alphabetic"
 		| "hanging"
 		| "mathematical"
-		| "inherit";
-	"baseline-shift"?: number | string;
-	clip?: string;
-	"clip-path"?: string;
-	"clip-rule"?: "nonzero" | "evenodd" | "inherit";
-	color?: string;
-	"color-interpolation"?: "auto" | "sRGB" | "linearRGB" | "inherit";
-	"color-interpolation-filters"?: "auto" | "sRGB" | "linearRGB" | "inherit";
-	"color-profile"?: string;
-	"color-rendering"?: "auto" | "optimizeSpeed" | "optimizeQuality" | "inherit";
-	cursor?: string;
-	direction?: "ltr" | "rtl" | "inherit";
-	display?: string;
-	"dominant-baseline"?:
+		| "inherit"
+	>;
+	"baseline-shift"?: AttributeValue<number | string>;
+	clip?: AttributeValue<string>;
+	"clip-path"?: AttributeValue<string>;
+	"clip-rule"?: AttributeValue<"nonzero" | "evenodd" | "inherit">;
+	color?: AttributeValue<string>;
+	"color-interpolation"?: AttributeValue<
+		"auto" | "sRGB" | "linearRGB" | "inherit"
+	>;
+	"color-interpolation-filters"?: AttributeValue<
+		"auto" | "sRGB" | "linearRGB" | "inherit"
+	>;
+	"color-profile"?: AttributeValue<string>;
+	"color-rendering"?: AttributeValue<
+		"auto" | "optimizeSpeed" | "optimizeQuality" | "inherit"
+	>;
+	cursor?: AttributeValue<string>;
+	direction?: AttributeValue<"ltr" | "rtl" | "inherit">;
+	display?: AttributeValue<string>;
+	"dominant-baseline"?: AttributeValue<
 		| "auto"
 		| "text-bottom"
 		| "alphabetic"
@@ -154,34 +162,39 @@ interface PresentationSVGAttributes {
 		| "mathematical"
 		| "hanging"
 		| "text-top"
-		| "inherit";
-	"enable-background"?: string;
-	fill?: string;
-	"fill-opacity"?: number | string | "inherit";
-	"fill-rule"?: "nonzero" | "evenodd" | "inherit";
-	filter?: string;
-	"flood-color"?: string;
-	"flood-opacity"?: number | string | "inherit";
-	"font-family"?: string;
-	"font-size"?: number | string;
-	"font-size-adjust"?: number | string;
-	"font-stretch"?: string;
-	"font-style"?: "normal" | "italic" | "oblique" | "inherit";
-	"font-variant"?: string;
-	"font-weight"?: number | string;
-	"glyph-orientation-horizontal"?: string;
-	"glyph-orientation-vertical"?: string;
-	"image-rendering"?: "auto" | "optimizeQuality" | "optimizeSpeed" | "inherit";
-	kerning?: string;
-	"letter-spacing"?: number | string;
-	"lighting-color"?: string;
-	"marker-end"?: string;
-	"marker-mid"?: string;
-	"marker-start"?: string;
-	mask?: string;
-	opacity?: number | string | "inherit";
-	overflow?: "visible" | "hidden" | "scroll" | "auto" | "inherit";
-	"pointer-events"?:
+		| "inherit"
+	>;
+	"enable-background"?: AttributeValue<string>;
+	fill?: AttributeValue<string>;
+	"fill-opacity"?: AttributeValue<number | string | "inherit">;
+	"fill-rule"?: AttributeValue<"nonzero" | "evenodd" | "inherit">;
+	filter?: AttributeValue<string>;
+	"flood-color"?: AttributeValue<string>;
+	"flood-opacity"?: AttributeValue<number | string | "inherit">;
+	"font-family"?: AttributeValue<string>;
+	"font-size"?: AttributeValue<number | string>;
+	"font-size-adjust"?: AttributeValue<number | string>;
+	"font-stretch"?: AttributeValue<string>;
+	"font-style"?: AttributeValue<"normal" | "italic" | "oblique" | "inherit">;
+	"font-variant"?: AttributeValue<string>;
+	"font-weight"?: AttributeValue<number | string>;
+	"glyph-orientation-horizontal"?: AttributeValue<string>;
+	"glyph-orientation-vertical"?: AttributeValue<string>;
+	"image-rendering"?: AttributeValue<
+		"auto" | "optimizeQuality" | "optimizeSpeed" | "inherit"
+	>;
+	kerning?: AttributeValue<string>;
+	"letter-spacing"?: AttributeValue<number | string>;
+	"lighting-color"?: AttributeValue<string>;
+	"marker-end"?: AttributeValue<string>;
+	"marker-mid"?: AttributeValue<string>;
+	"marker-start"?: AttributeValue<string>;
+	mask?: AttributeValue<string>;
+	opacity?: AttributeValue<number | string | "inherit">;
+	overflow?: AttributeValue<
+		"visible" | "hidden" | "scroll" | "auto" | "inherit"
+	>;
+	"pointer-events"?: AttributeValue<
 		| "bounding-box"
 		| "visiblePainted"
 		| "visibleFill"
@@ -193,47 +206,40 @@ interface PresentationSVGAttributes {
 		| "stroke"
 		| "all"
 		| "none"
-		| "inherit";
-	"shape-rendering"?:
-		| "auto"
-		| "optimizeSpeed"
-		| "crispEdges"
-		| "geometricPrecision"
-		| "inherit";
-	"stop-color"?: string;
-	"stop-opacity"?: number | string | "inherit";
-	stroke?: string;
-	"stroke-dasharray"?: string;
-	"stroke-dashoffset"?: number | string;
-	"stroke-linecap"?: "butt" | "round" | "square" | "inherit";
-	"stroke-linejoin"?:
-		| "arcs"
-		| "bevel"
-		| "miter"
-		| "miter-clip"
-		| "round"
-		| "inherit";
-	"stroke-miterlimit"?: number | string | "inherit";
-	"stroke-opacity"?: number | string | "inherit";
-	"stroke-width"?: number | string;
-	"text-anchor"?: "start" | "middle" | "end" | "inherit";
-	"text-decoration"?:
-		| "none"
-		| "underline"
-		| "overline"
-		| "line-through"
-		| "blink"
-		| "inherit";
-	"text-rendering"?:
+		| "inherit"
+	>;
+	"shape-rendering"?: AttributeValue<
+		"auto" | "optimizeSpeed" | "crispEdges" | "geometricPrecision" | "inherit"
+	>;
+	"stop-color"?: AttributeValue<string>;
+	"stop-opacity"?: AttributeValue<number | string | "inherit">;
+	stroke?: AttributeValue<string>;
+	"stroke-dasharray"?: AttributeValue<string>;
+	"stroke-dashoffset"?: AttributeValue<number | string>;
+	"stroke-linecap"?: AttributeValue<"butt" | "round" | "square" | "inherit">;
+	"stroke-linejoin"?: AttributeValue<
+		"arcs" | "bevel" | "miter" | "miter-clip" | "round" | "inherit"
+	>;
+	"stroke-miterlimit"?: AttributeValue<number | string | "inherit">;
+	"stroke-opacity"?: AttributeValue<number | string | "inherit">;
+	"stroke-width"?: AttributeValue<number | string>;
+	"text-anchor"?: AttributeValue<"start" | "middle" | "end" | "inherit">;
+	"text-decoration"?: AttributeValue<
+		"none" | "underline" | "overline" | "line-through" | "blink" | "inherit"
+	>;
+	"text-rendering"?: AttributeValue<
 		| "auto"
 		| "optimizeSpeed"
 		| "optimizeLegibility"
 		| "geometricPrecision"
-		| "inherit";
-	"unicode-bidi"?: string;
-	visibility?: "visible" | "hidden" | "collapse" | "inherit";
-	"word-spacing"?: number | string;
-	"writing-mode"?: "lr-tb" | "rl-tb" | "tb-rl" | "lr" | "rl" | "tb" | "inherit";
+		| "inherit"
+	>;
+	"unicode-bidi"?: AttributeValue<string>;
+	visibility?: AttributeValue<"visible" | "hidden" | "collapse" | "inherit">;
+	"word-spacing"?: AttributeValue<number | string>;
+	"writing-mode"?: AttributeValue<
+		"lr-tb" | "rl-tb" | "tb-rl" | "lr" | "rl" | "tb" | "inherit"
+	>;
 }
 interface AnimationElementSVGAttributes<T>
 	extends SVGAttributes<T>,
@@ -255,30 +261,30 @@ interface ContainerElementSVGAttributes<T>
 interface FilterPrimitiveElementSVGAttributes<T>
 	extends SVGAttributes<T>,
 		Pick<PresentationSVGAttributes, "color-interpolation-filters"> {
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
-	result?: string;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
+	result?: AttributeValue<string>;
 }
 interface SingleInputFilterSVGAttributes {
-	in?: string;
+	in?: AttributeValue<string>;
 }
 interface DoubleInputFilterSVGAttributes {
-	in?: string;
-	in2?: string;
+	in?: AttributeValue<string>;
+	in2?: AttributeValue<string>;
 }
 interface FitToViewBoxSVGAttributes {
-	viewBox?: string;
-	preserveAspectRatio?: SVGPreserveAspectRatio;
+	viewBox?: AttributeValue<string>;
+	preserveAspectRatio?: AttributeValue<SVGPreserveAspectRatio>;
 }
 interface GradientElementSVGAttributes<T>
 	extends SVGAttributes<T>,
 		ExternalResourceSVGAttributes,
 		StylableSVGAttributes {
-	gradientUnits?: SVGUnits;
-	gradientTransform?: string;
-	spreadMethod?: "pad" | "reflect" | "repeat";
+	gradientUnits?: AttributeValue<SVGUnits>;
+	gradientTransform?: AttributeValue<string>;
+	spreadMethod?: AttributeValue<"pad" | "reflect" | "repeat">;
 }
 interface GraphicsElementSVGAttributes<T>
 	extends SVGAttributes<T>,
@@ -299,7 +305,7 @@ interface LightSourceElementSVGAttributes<T> extends SVGAttributes<T> {}
 interface NewViewportSVGAttributes<T>
 	extends SVGAttributes<T>,
 		Pick<PresentationSVGAttributes, "overflow" | "clip"> {
-	viewBox?: string;
+	viewBox?: AttributeValue<string>;
 }
 interface ShapeElementSVGAttributes<T>
 	extends SVGAttributes<T>,
@@ -354,7 +360,7 @@ interface TextContentElementSVGAttributes<T>
 			| "word-spacing"
 		> {}
 interface ZoomAndPanSVGAttributes {
-	zoomAndPan?: "disable" | "magnify";
+	zoomAndPan?: AttributeValue<"disable" | "magnify">;
 }
 interface AnimateSVGAttributes<T>
 	extends AnimationElementSVGAttributes<T>,
@@ -371,10 +377,10 @@ interface AnimateMotionSVGAttributes<T>
 		AnimationTimingSVGAttributes,
 		AnimationValueSVGAttributes,
 		AnimationAdditionSVGAttributes {
-	path?: string;
-	keyPoints?: string;
-	rotate?: number | string | "auto" | "auto-reverse";
-	origin?: "default";
+	path?: AttributeValue<string>;
+	keyPoints?: AttributeValue<string>;
+	rotate?: AttributeValue<number | string | "auto" | "auto-reverse">;
+	origin?: AttributeValue<"default">;
 }
 interface AnimateTransformSVGAttributes<T>
 	extends AnimationElementSVGAttributes<T>,
@@ -382,7 +388,7 @@ interface AnimateTransformSVGAttributes<T>
 		AnimationTimingSVGAttributes,
 		AnimationValueSVGAttributes,
 		AnimationAdditionSVGAttributes {
-	type?: "translate" | "scale" | "rotate" | "skewX" | "skewY";
+	type?: AttributeValue<"translate" | "scale" | "rotate" | "skewX" | "skewY">;
 }
 interface CircleSVGAttributes<T>
 	extends GraphicsElementSVGAttributes<T>,
@@ -390,9 +396,9 @@ interface CircleSVGAttributes<T>
 		ConditionalProcessingSVGAttributes,
 		StylableSVGAttributes,
 		TransformableSVGAttributes {
-	cx?: number | string;
-	cy?: number | string;
-	r?: number | string;
+	cx?: AttributeValue<number | string>;
+	cy?: AttributeValue<number | string>;
+	r?: AttributeValue<number | string>;
 }
 interface ClipPathSVGAttributes<T>
 	extends SVGAttributes<T>,
@@ -401,7 +407,7 @@ interface ClipPathSVGAttributes<T>
 		StylableSVGAttributes,
 		TransformableSVGAttributes,
 		Pick<PresentationSVGAttributes, "clip-path"> {
-	clipPathUnits?: SVGUnits;
+	clipPathUnits?: AttributeValue<SVGUnits>;
 }
 interface DefsSVGAttributes<T>
 	extends ContainerElementSVGAttributes<T>,
@@ -419,23 +425,27 @@ interface EllipseSVGAttributes<T>
 		ExternalResourceSVGAttributes,
 		StylableSVGAttributes,
 		TransformableSVGAttributes {
-	cx?: number | string;
-	cy?: number | string;
-	rx?: number | string;
-	ry?: number | string;
+	cx?: AttributeValue<number | string>;
+	cy?: AttributeValue<number | string>;
+	rx?: AttributeValue<number | string>;
+	ry?: AttributeValue<number | string>;
 }
 interface FeBlendSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		DoubleInputFilterSVGAttributes,
 		StylableSVGAttributes {
-	mode?: "normal" | "multiply" | "screen" | "darken" | "lighten";
+	mode?: AttributeValue<
+		"normal" | "multiply" | "screen" | "darken" | "lighten"
+	>;
 }
 interface FeColorMatrixSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		SingleInputFilterSVGAttributes,
 		StylableSVGAttributes {
-	type?: "matrix" | "saturate" | "hueRotate" | "luminanceToAlpha";
-	values?: string;
+	type?: AttributeValue<
+		"matrix" | "saturate" | "hueRotate" | "luminanceToAlpha"
+	>;
+	values?: AttributeValue<string>;
 }
 interface FeComponentTransferSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
@@ -445,47 +455,49 @@ interface FeCompositeSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		DoubleInputFilterSVGAttributes,
 		StylableSVGAttributes {
-	operator?: "over" | "in" | "out" | "atop" | "xor" | "arithmetic";
-	k1?: number | string;
-	k2?: number | string;
-	k3?: number | string;
-	k4?: number | string;
+	operator?: AttributeValue<
+		"over" | "in" | "out" | "atop" | "xor" | "arithmetic"
+	>;
+	k1?: AttributeValue<number | string>;
+	k2?: AttributeValue<number | string>;
+	k3?: AttributeValue<number | string>;
+	k4?: AttributeValue<number | string>;
 }
 interface FeConvolveMatrixSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		SingleInputFilterSVGAttributes,
 		StylableSVGAttributes {
-	order?: number | string;
-	kernelMatrix?: string;
-	divisor?: number | string;
-	bias?: number | string;
-	targetX?: number | string;
-	targetY?: number | string;
-	edgeMode?: "duplicate" | "wrap" | "none";
-	kernelUnitLength?: number | string;
-	preserveAlpha?: "true" | "false";
+	order?: AttributeValue<number | string>;
+	kernelMatrix?: AttributeValue<string>;
+	divisor?: AttributeValue<number | string>;
+	bias?: AttributeValue<number | string>;
+	targetX?: AttributeValue<number | string>;
+	targetY?: AttributeValue<number | string>;
+	edgeMode?: AttributeValue<"duplicate" | "wrap" | "none">;
+	kernelUnitLength?: AttributeValue<number | string>;
+	preserveAlpha?: AttributeValue<"true" | "false">;
 }
 interface FeDiffuseLightingSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		SingleInputFilterSVGAttributes,
 		StylableSVGAttributes,
 		Pick<PresentationSVGAttributes, "color" | "lighting-color"> {
-	surfaceScale?: number | string;
-	diffuseConstant?: number | string;
-	kernelUnitLength?: number | string;
+	surfaceScale?: AttributeValue<number | string>;
+	diffuseConstant?: AttributeValue<number | string>;
+	kernelUnitLength?: AttributeValue<number | string>;
 }
 interface FeDisplacementMapSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		DoubleInputFilterSVGAttributes,
 		StylableSVGAttributes {
-	scale?: number | string;
-	xChannelSelector?: "R" | "G" | "B" | "A";
-	yChannelSelector?: "R" | "G" | "B" | "A";
+	scale?: AttributeValue<number | string>;
+	xChannelSelector?: AttributeValue<"R" | "G" | "B" | "A">;
+	yChannelSelector?: AttributeValue<"R" | "G" | "B" | "A">;
 }
 interface FeDistantLightSVGAttributes<T>
 	extends LightSourceElementSVGAttributes<T> {
-	azimuth?: number | string;
-	elevation?: number | string;
+	azimuth?: AttributeValue<number | string>;
+	elevation?: AttributeValue<number | string>;
 }
 interface FeFloodSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
@@ -495,19 +507,19 @@ interface FeFloodSVGAttributes<T>
 			"color" | "flood-color" | "flood-opacity"
 		> {}
 interface FeFuncSVGAttributes<T> extends SVGAttributes<T> {
-	type?: "identity" | "table" | "discrete" | "linear" | "gamma";
-	tableValues?: string;
-	slope?: number | string;
-	intercept?: number | string;
-	amplitude?: number | string;
-	exponent?: number | string;
-	offset?: number | string;
+	type?: AttributeValue<"identity" | "table" | "discrete" | "linear" | "gamma">;
+	tableValues?: AttributeValue<string>;
+	slope?: AttributeValue<number | string>;
+	intercept?: AttributeValue<number | string>;
+	amplitude?: AttributeValue<number | string>;
+	exponent?: AttributeValue<number | string>;
+	offset?: AttributeValue<number | string>;
 }
 interface FeGaussianBlurSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		SingleInputFilterSVGAttributes,
 		StylableSVGAttributes {
-	stdDeviation?: number | string;
+	stdDeviation?: AttributeValue<number | string>;
 }
 interface FeImageSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
@@ -525,42 +537,42 @@ interface FeMorphologySVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		SingleInputFilterSVGAttributes,
 		StylableSVGAttributes {
-	operator?: "erode" | "dilate";
-	radius?: number | string;
+	operator?: AttributeValue<"erode" | "dilate">;
+	radius?: AttributeValue<number | string>;
 }
 interface FeOffsetSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		SingleInputFilterSVGAttributes,
 		StylableSVGAttributes {
-	dx?: number | string;
-	dy?: number | string;
+	dx?: AttributeValue<number | string>;
+	dy?: AttributeValue<number | string>;
 }
 interface FePointLightSVGAttributes<T>
 	extends LightSourceElementSVGAttributes<T> {
-	x?: number | string;
-	y?: number | string;
-	z?: number | string;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	z?: AttributeValue<number | string>;
 }
 interface FeSpecularLightingSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		SingleInputFilterSVGAttributes,
 		StylableSVGAttributes,
 		Pick<PresentationSVGAttributes, "color" | "lighting-color"> {
-	surfaceScale?: number | string;
-	specularConstant?: number | string;
-	specularExponent?: number | string;
-	kernelUnitLength?: number | string;
+	surfaceScale?: AttributeValue<number | string>;
+	specularConstant?: AttributeValue<number | string>;
+	specularExponent?: AttributeValue<number | string>;
+	kernelUnitLength?: AttributeValue<number | string>;
 }
 interface FeSpotLightSVGAttributes<T>
 	extends LightSourceElementSVGAttributes<T> {
-	x?: number | string;
-	y?: number | string;
-	z?: number | string;
-	pointsAtX?: number | string;
-	pointsAtY?: number | string;
-	pointsAtZ?: number | string;
-	specularExponent?: number | string;
-	limitingConeAngle?: number | string;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	z?: AttributeValue<number | string>;
+	pointsAtX?: AttributeValue<number | string>;
+	pointsAtY?: AttributeValue<number | string>;
+	pointsAtZ?: AttributeValue<number | string>;
+	specularExponent?: AttributeValue<number | string>;
+	limitingConeAngle?: AttributeValue<number | string>;
 }
 interface FeTileSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
@@ -569,23 +581,23 @@ interface FeTileSVGAttributes<T>
 interface FeTurbulanceSVGAttributes<T>
 	extends FilterPrimitiveElementSVGAttributes<T>,
 		StylableSVGAttributes {
-	baseFrequency?: number | string;
-	numOctaves?: number | string;
-	seed?: number | string;
-	stitchTiles?: "stitch" | "noStitch";
-	type?: "fractalNoise" | "turbulence";
+	baseFrequency?: AttributeValue<number | string>;
+	numOctaves?: AttributeValue<number | string>;
+	seed?: AttributeValue<number | string>;
+	stitchTiles?: AttributeValue<"stitch" | "noStitch">;
+	type?: AttributeValue<"fractalNoise" | "turbulence">;
 }
 interface FilterSVGAttributes<T>
 	extends SVGAttributes<T>,
 		ExternalResourceSVGAttributes,
 		StylableSVGAttributes {
-	filterUnits?: SVGUnits;
-	primitiveUnits?: SVGUnits;
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
-	filterRes?: number | string;
+	filterUnits?: AttributeValue<SVGUnits>;
+	primitiveUnits?: AttributeValue<SVGUnits>;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
+	filterRes?: AttributeValue<number | string>;
 }
 interface ForeignObjectSVGAttributes<T>
 	extends NewViewportSVGAttributes<T>,
@@ -594,10 +606,10 @@ interface ForeignObjectSVGAttributes<T>
 		StylableSVGAttributes,
 		TransformableSVGAttributes,
 		Pick<PresentationSVGAttributes, "display" | "visibility"> {
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
 }
 interface GSVGAttributes<T>
 	extends ContainerElementSVGAttributes<T>,
@@ -613,11 +625,11 @@ interface ImageSVGAttributes<T>
 		StylableSVGAttributes,
 		TransformableSVGAttributes,
 		Pick<PresentationSVGAttributes, "color-profile" | "image-rendering"> {
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
-	preserveAspectRatio?: ImagePreserveAspectRatio;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
+	preserveAspectRatio?: AttributeValue<ImagePreserveAspectRatio>;
 }
 interface LineSVGAttributes<T>
 	extends GraphicsElementSVGAttributes<T>,
@@ -630,17 +642,17 @@ interface LineSVGAttributes<T>
 			PresentationSVGAttributes,
 			"marker-start" | "marker-mid" | "marker-end"
 		> {
-	x1?: number | string;
-	y1?: number | string;
-	x2?: number | string;
-	y2?: number | string;
+	x1?: AttributeValue<number | string>;
+	y1?: AttributeValue<number | string>;
+	x2?: AttributeValue<number | string>;
+	y2?: AttributeValue<number | string>;
 }
 interface LinearGradientSVGAttributes<T>
 	extends GradientElementSVGAttributes<T> {
-	x1?: number | string;
-	x2?: number | string;
-	y1?: number | string;
-	y2?: number | string;
+	x1?: AttributeValue<number | string>;
+	x2?: AttributeValue<number | string>;
+	y1?: AttributeValue<number | string>;
+	y2?: AttributeValue<number | string>;
 }
 interface MarkerSVGAttributes<T>
 	extends ContainerElementSVGAttributes<T>,
@@ -648,24 +660,24 @@ interface MarkerSVGAttributes<T>
 		StylableSVGAttributes,
 		FitToViewBoxSVGAttributes,
 		Pick<PresentationSVGAttributes, "overflow" | "clip"> {
-	markerUnits?: "strokeWidth" | "userSpaceOnUse";
-	refX?: number | string;
-	refY?: number | string;
-	markerWidth?: number | string;
-	markerHeight?: number | string;
-	orient?: string;
+	markerUnits?: AttributeValue<"strokeWidth" | "userSpaceOnUse">;
+	refX?: AttributeValue<number | string>;
+	refY?: AttributeValue<number | string>;
+	markerWidth?: AttributeValue<number | string>;
+	markerHeight?: AttributeValue<number | string>;
+	orient?: AttributeValue<string>;
 }
 interface MaskSVGAttributes<T>
 	extends Omit<ContainerElementSVGAttributes<T>, "opacity" | "filter">,
 		ConditionalProcessingSVGAttributes,
 		ExternalResourceSVGAttributes,
 		StylableSVGAttributes {
-	maskUnits?: SVGUnits;
-	maskContentUnits?: SVGUnits;
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
+	maskUnits?: AttributeValue<SVGUnits>;
+	maskContentUnits?: AttributeValue<SVGUnits>;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
 }
 interface MetadataSVGAttributes<T> extends SVGAttributes<T> {}
 interface PathSVGAttributes<T>
@@ -679,8 +691,8 @@ interface PathSVGAttributes<T>
 			PresentationSVGAttributes,
 			"marker-start" | "marker-mid" | "marker-end"
 		> {
-	d?: string;
-	pathLength?: number | string;
+	d?: AttributeValue<string>;
+	pathLength?: AttributeValue<number | string>;
 }
 interface PatternSVGAttributes<T>
 	extends ContainerElementSVGAttributes<T>,
@@ -689,13 +701,13 @@ interface PatternSVGAttributes<T>
 		StylableSVGAttributes,
 		FitToViewBoxSVGAttributes,
 		Pick<PresentationSVGAttributes, "overflow" | "clip"> {
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
-	patternUnits?: SVGUnits;
-	patternContentUnits?: SVGUnits;
-	patternTransform?: string;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
+	patternUnits?: AttributeValue<SVGUnits>;
+	patternContentUnits?: AttributeValue<SVGUnits>;
+	patternTransform?: AttributeValue<string>;
 }
 interface PolygonSVGAttributes<T>
 	extends GraphicsElementSVGAttributes<T>,
@@ -708,7 +720,7 @@ interface PolygonSVGAttributes<T>
 			PresentationSVGAttributes,
 			"marker-start" | "marker-mid" | "marker-end"
 		> {
-	points?: string;
+	points?: AttributeValue<string>;
 }
 interface PolylineSVGAttributes<T>
 	extends GraphicsElementSVGAttributes<T>,
@@ -721,15 +733,15 @@ interface PolylineSVGAttributes<T>
 			PresentationSVGAttributes,
 			"marker-start" | "marker-mid" | "marker-end"
 		> {
-	points?: string;
+	points?: AttributeValue<string>;
 }
 interface RadialGradientSVGAttributes<T>
 	extends GradientElementSVGAttributes<T> {
-	cx?: number | string;
-	cy?: number | string;
-	r?: number | string;
-	fx?: number | string;
-	fy?: number | string;
+	cx?: AttributeValue<number | string>;
+	cy?: AttributeValue<number | string>;
+	r?: AttributeValue<number | string>;
+	fx?: AttributeValue<number | string>;
+	fy?: AttributeValue<number | string>;
 }
 interface RectSVGAttributes<T>
 	extends GraphicsElementSVGAttributes<T>,
@@ -738,18 +750,18 @@ interface RectSVGAttributes<T>
 		ExternalResourceSVGAttributes,
 		StylableSVGAttributes,
 		TransformableSVGAttributes {
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
-	rx?: number | string;
-	ry?: number | string;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
+	rx?: AttributeValue<number | string>;
+	ry?: AttributeValue<number | string>;
 }
 interface StopSVGAttributes<T>
 	extends SVGAttributes<T>,
 		StylableSVGAttributes,
 		Pick<PresentationSVGAttributes, "color" | "stop-color" | "stop-opacity"> {
-	offset?: number | string;
+	offset?: AttributeValue<number | string>;
 }
 interface SvgSVGAttributes<T>
 	extends ContainerElementSVGAttributes<T>,
@@ -760,15 +772,15 @@ interface SvgSVGAttributes<T>
 		FitToViewBoxSVGAttributes,
 		ZoomAndPanSVGAttributes,
 		PresentationSVGAttributes {
-	version?: string;
-	"base-profile"?: string;
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
-	contentScriptType?: string;
-	contentStyleType?: string;
-	xmlns?: string;
+	version?: AttributeValue<string>;
+	"base-profile"?: AttributeValue<string>;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
+	contentScriptType?: AttributeValue<string>;
+	contentStyleType?: AttributeValue<string>;
+	xmlns?: AttributeValue<string>;
 }
 interface SwitchSVGAttributes<T>
 	extends ContainerElementSVGAttributes<T>,
@@ -791,13 +803,13 @@ interface TextSVGAttributes<T>
 		StylableSVGAttributes,
 		TransformableSVGAttributes,
 		Pick<PresentationSVGAttributes, "writing-mode" | "text-rendering"> {
-	x?: number | string;
-	y?: number | string;
-	dx?: number | string;
-	dy?: number | string;
-	rotate?: number | string;
-	textLength?: number | string;
-	lengthAdjust?: "spacing" | "spacingAndGlyphs";
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	dx?: AttributeValue<number | string>;
+	dy?: AttributeValue<number | string>;
+	rotate?: AttributeValue<number | string>;
+	textLength?: AttributeValue<number | string>;
+	lengthAdjust?: AttributeValue<"spacing" | "spacingAndGlyphs">;
 }
 interface TextPathSVGAttributes<T>
 	extends TextContentElementSVGAttributes<T>,
@@ -808,9 +820,9 @@ interface TextPathSVGAttributes<T>
 			PresentationSVGAttributes,
 			"alignment-baseline" | "baseline-shift" | "display" | "visibility"
 		> {
-	startOffset?: number | string;
-	method?: "align" | "stretch";
-	spacing?: "auto" | "exact";
+	startOffset?: AttributeValue<number | string>;
+	method?: AttributeValue<"align" | "stretch">;
+	spacing?: AttributeValue<"auto" | "exact">;
 }
 interface TSpanSVGAttributes<T>
 	extends TextContentElementSVGAttributes<T>,
@@ -821,13 +833,13 @@ interface TSpanSVGAttributes<T>
 			PresentationSVGAttributes,
 			"alignment-baseline" | "baseline-shift" | "display" | "visibility"
 		> {
-	x?: number | string;
-	y?: number | string;
-	dx?: number | string;
-	dy?: number | string;
-	rotate?: number | string;
-	textLength?: number | string;
-	lengthAdjust?: "spacing" | "spacingAndGlyphs";
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	dx?: AttributeValue<number | string>;
+	dy?: AttributeValue<number | string>;
+	rotate?: AttributeValue<number | string>;
+	textLength?: AttributeValue<number | string>;
+	lengthAdjust?: AttributeValue<"spacing" | "spacingAndGlyphs">;
 }
 interface UseSVGAttributes<T>
 	extends GraphicsElementSVGAttributes<T>,
@@ -835,18 +847,18 @@ interface UseSVGAttributes<T>
 		ExternalResourceSVGAttributes,
 		StylableSVGAttributes,
 		TransformableSVGAttributes {
-	href?: string;
-	x?: number | string;
-	y?: number | string;
-	width?: number | string;
-	height?: number | string;
+	href?: AttributeValue<string>;
+	x?: AttributeValue<number | string>;
+	y?: AttributeValue<number | string>;
+	width?: AttributeValue<number | string>;
+	height?: AttributeValue<number | string>;
 }
 interface ViewSVGAttributes<T>
 	extends SVGAttributes<T>,
 		ExternalResourceSVGAttributes,
 		FitToViewBoxSVGAttributes,
 		ZoomAndPanSVGAttributes {
-	viewTarget?: string;
+	viewTarget?: AttributeValue<string>;
 }
 export interface SVGElements {
 	animate: AnimateSVGAttributes<SVGAnimateElement>;

@@ -1,3 +1,5 @@
+/** @jsxImportSource ../src */
+
 import { Effect, Schedule, Stream } from "effect";
 import { mount } from "@/api";
 
@@ -13,7 +15,7 @@ function Counter() {
 	);
 
 	return (
-		<div class="demo-section">
+		<div id={Effect.succeed(undefined)} class="demo-section">
 			<h2>Auto-incrementing Counter</h2>
 			<div class="counter">{counterStream}</div>
 			<p>Updates every second using Stream.iterate</p>

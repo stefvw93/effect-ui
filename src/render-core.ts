@@ -6,7 +6,8 @@ import {
 	Stream,
 } from "effect";
 import { setElementProps } from "./dom";
-import { FRAGMENT, type JSXNode } from "./jsx-runtime";
+import { FRAGMENT } from "./jsx-runtime";
+import type { JSXNode } from "./jsx-runtime/values";
 import {
 	InvalidElementTypeError,
 	type RenderError,

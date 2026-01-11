@@ -1,5 +1,5 @@
 import { Effect, Exit, Layer, ManagedRuntime, Scope } from "effect";
-import type { JSXNode } from "./jsx-runtime";
+import type { JSXNode } from "./jsx-runtime/values";
 import { RenderContext, renderNode } from "./render-core";
 import type {
 	InvalidElementTypeError,

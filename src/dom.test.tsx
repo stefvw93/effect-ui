@@ -801,7 +801,6 @@ describe("AC17: Stream Errors", () => {
 
 		// Should eventually fail
 		try {
-			// @ts-expect-error - testing failing Stream
 			await runMount(<div>{failingStream}</div>, root);
 			await waitFor(100);
 			// If no error thrown yet, that's acceptable - errors may be async
