@@ -17,7 +17,7 @@ A reactive DOM rendering library built on [Effect](https://effect.website) that 
 ## Requirements
 
 - Node.js ≥ 24.7.0
-- pnpm ≥ 10.15.0
+- pnpm ≥ 10.28.0
 
 ## Quick Start
 

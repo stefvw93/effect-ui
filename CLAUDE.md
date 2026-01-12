@@ -9,7 +9,7 @@ A minimal Node.js + TypeScript project template using modern tooling and strict 
 ## Requirements
 
 - Node.js ≥ 24.7.0
-- pnpm ≥ 10.15.0
+- pnpm ≥ 10.28.0
 
 ## Development Commands
 
