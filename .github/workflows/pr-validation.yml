@@ -2,9 +2,6 @@ name: PR Validation
 
 on:
   pull_request:
-    branches: [main]
-  push:
-    branches: [main]
 
 jobs:
   lint:
@@ -18,7 +15,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.15.0
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -43,7 +40,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.15.0
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -68,7 +65,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.15.0
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -93,7 +90,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.15.0
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v6

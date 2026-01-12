@@ -2,7 +2,7 @@
 	"name": "effect-ui",
 	"engines": {
 		"node": ">=24.7.0",
-		"pnpm": ">=10.15.0"
+		"pnpm": ">=10.28.0"
 	},
 	"version": "0.0.0",
 	"description": "A reactive DOM rendering library built on Effect that enables declarative UI with streams and automatic updates.",
@@ -31,10 +31,15 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.5",
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/commit-analyzer": "^13.0.1",
+		"@semantic-release/github": "^12.0.2",
+		"@semantic-release/release-notes-generator": "^14.1.0",
 		"@types/jsdom": "^27.0.0",
-		"@types/node": "^24.7.1",
+		"@types/node": "^24.10.7",
 		"@vitejs/plugin-react": "^5.1.2",
 		"jsdom": "^27.4.0",
+		"semantic-release": "^25.0.2",
 		"tsdown": "^0.19.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
