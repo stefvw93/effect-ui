@@ -1,14 +1,25 @@
 {
-	"name": "std-nodejs-typescript",
+	"name": "effect-ui",
 	"engines": {
 		"node": ">=24.7.0",
 		"pnpm": ">=10.15.0"
 	},
-	"version": "1.0.0",
-	"description": "A minimal Node.js + TypeScript project template",
+	"version": "0.0.0",
+	"description": "A reactive DOM rendering library built on Effect that enables declarative UI with streams and automatic updates.",
 	"license": "ISC",
-	"author": "",
+	"author": "Stef van Wijchen",
 	"type": "module",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"types": "./dist/api.d.ts",
+			"import": "./dist/api.js"
+		},
+		"./jsx-runtime": {
+			"types": "./dist/jsx-runtime/index.d.ts",
+			"import": "./dist/jsx-runtime/index.js"
+		}
+	},
 	"scripts": {
 		"build": "tsdown",
 		"dev": "vite playground --config vite.config.ts",
