@@ -4,5 +4,9 @@
 		"@semantic-release/commit-analyzer",
 		"@semantic-release/release-notes-generator",
 		"@semantic-release/github"
-	]
+	],
+	"tagFormat": "v${version}",
+	"release": {
+		"initialVersion": "0.1.0"
+	}
 }
