@@ -10,7 +10,6 @@
 	"author": "Stef van Wijchen",
 	"type": "module",
 	"exports": {
-		"./package.json": "./package.json",
 		".": {
 			"types": "./dist/api.d.ts",
 			"import": "./dist/api.js"
