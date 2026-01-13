@@ -21,9 +21,11 @@ A reactive DOM rendering library built on [Effect](https://effect.website) that 
 
 ## Quick Start
 
+Install from latest release, then:
+
 ```tsx
 import { Effect, Stream, Schedule } from "effect";
-import { mount } from "./src/dom";
+import { mount } from "effect-ui";
 
 // Create a reactive counter
 const counter = Stream.iterate(0, n => n + 1).pipe(
