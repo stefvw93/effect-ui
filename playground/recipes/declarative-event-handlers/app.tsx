@@ -129,7 +129,10 @@ const ConditionalButton = ({ enabled }: { enabled: boolean }) => (
 // ============================================================================
 
 const App = () => (
-	<div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+	<div>
+		<a href="../" class="back-link">
+			&larr; Back to Recipes
+		</a>
 		<h1>Event Handler Examples</h1>
 
 		<section>
@@ -162,5 +165,8 @@ const App = () => (
 
 // Mount with services provided
 Effect.runPromise(
-	mount(<App />, document.body).pipe(Effect.provide(AnalyticsLive)),
+	// biome-ignore lint/style/noNonNullAssertion: playground code, element always exists
+	mount(<App />, document.getElementById("root")!).pipe(
+		Effect.provide(AnalyticsLive),
+	),
 );

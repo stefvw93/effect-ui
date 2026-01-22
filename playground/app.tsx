@@ -20,6 +20,9 @@ const A = (props: { label: string }) =>
 
 const App = () => (
 	<div style={{ fontFamily: "monospace" }}>
+		<div style={{ marginBottom: "1rem" }}>
+			<a href="./recipes/">View Recipes &rarr;</a>
+		</div>
 		{Array.from({ length: 10 }, (_, i) => i).map((i) => (
 			<A label={`${i}`} />
 		))}
