@@ -1,4 +1,4 @@
-import { Console, Effect, Stream } from "effect";
+import { Effect, Stream } from "effect";
 import { mount } from "@/api";
 
 const A = (props: { label: string }) =>
@@ -13,16 +13,12 @@ const A = (props: { label: string }) =>
 		),
 	);
 
-const App = () =>
-	Effect.gen(function* () {
-		yield* Console.log("App");
-		return (
-			<div style={{ fontFamily: "monospace" }}>
-				{Array.from({ length: 10 }, (_, i) => i).map((i) => (
-					<A label={`${i}`} />
-				))}
-			</div>
-		);
-	});
+const App = () => (
+	<div style={{ fontFamily: "monospace" }}>
+		{Array.from({ length: 10 }, (_, i) => i).map((i) => (
+			<A label={`${i}`} />
+		))}
+	</div>
+);
 
 Effect.runPromise(mount(<App />, document.body));
