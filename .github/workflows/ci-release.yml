@@ -43,6 +43,9 @@ jobs:
       - name: Run type checking
         run: pnpm typecheck
 
+      - name: Run type tests
+        run: pnpm typecheck.type-tests
+
   test:
     name: Test
     runs-on: ubuntu-latest
