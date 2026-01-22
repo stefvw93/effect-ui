@@ -1,11 +1,9 @@
 import {
-	Console,
 	Context,
 	Effect,
 	Layer,
 	Option,
 	pipe,
-	Ref,
 	Stream,
 	SubscriptionRef,
 } from "effect";
