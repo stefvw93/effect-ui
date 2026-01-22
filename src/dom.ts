@@ -16,11 +16,7 @@ function isEventHandler(name: string): boolean {
 	}
 	const thirdChar = name[2];
 	// Must be a lowercase letter (a-z), not a number or uppercase
-	return (
-		thirdChar !== undefined &&
-		thirdChar >= "a" &&
-		thirdChar <= "z"
-	);
+	return thirdChar !== undefined && thirdChar >= "a" && thirdChar <= "z";
 }
 
 // ============================================================================
