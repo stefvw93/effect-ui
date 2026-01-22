@@ -1568,7 +1568,7 @@ describe("Ref Handling", () => {
 		const root = createRoot();
 
 		// Create the ref and track if we received an element via the stream
-		let receivedElement: HTMLInputElement | null = null;
+		const captured: { element: HTMLInputElement | null } = { element: null };
 
 		await Effect.runPromise(
 			Effect.gen(function* () {
@@ -1580,8 +1580,8 @@ describe("Ref Handling", () => {
 				yield* Effect.fork(
 					Stream.runForEach(Stream.filter(ref.changes, Option.isSome), (opt) =>
 						Effect.sync(() => {
-							if (receivedElement === null) {
-								receivedElement = Option.getOrThrow(opt);
+							if (captured.element === null) {
+								captured.element = Option.getOrThrow(opt);
 							}
 						}),
 					),
@@ -1605,12 +1605,13 @@ describe("Ref Handling", () => {
 		await waitForStream();
 
 		// Verify we received the element through the subscription
+		const receivedElement = captured.element;
 		assert.ok(
 			receivedElement !== null,
 			"Should have received element via stream",
 		);
-		assert.equal(receivedElement?.tagName, "INPUT");
-		assert.equal(receivedElement?.type, "text");
+		assert.equal(receivedElement.tagName, "INPUT");
+		assert.equal(receivedElement.type, "text");
 	});
 
 	it("should work with HTMLElement for div", async () => {
