@@ -5,13 +5,11 @@ const A = (props: { label: string }) =>
 	Stream.concat(
 		Stream.make("?"),
 		Stream.fromEffect(
-			Effect.promise(
-				() =>
-					new Promise<string>((resolve) => {
-						const delay = Math.floor(Math.random() * 2000) + 1000; // 1000-3000 ms
-						setTimeout(() => resolve(props.label), delay);
-					}),
-			),
+			Effect.gen(function* () {
+				const delay = Math.floor(Math.random() * 2000) + 1000;
+				yield* Effect.sleep(delay);
+				return props.label;
+			}),
 		),
 	);
 
