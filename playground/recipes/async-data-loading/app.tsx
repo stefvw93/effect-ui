@@ -141,25 +141,33 @@ const App = () => (
 		<section>
 			<h2>1. Loading State Pattern</h2>
 			<p>Shows loading, then data after delay.</p>
-			<LoadingThenData />
+			<div style={{ marginTop: "0.5rem" }}>
+				<LoadingThenData />
+			</div>
 		</section>
 
 		<section>
 			<h2>2. Effect Component (Direct)</h2>
 			<p>Component returns Effect directly.</p>
-			<DelayedGreeting name="World" />
+			<div style={{ marginTop: "0.5rem" }}>
+				<DelayedGreeting name="World" />
+			</div>
 		</section>
 
 		<section>
 			<h2>3. Parallel Loading with Error Handling</h2>
 			<p>Multiple users load in parallel. User 3 will fail.</p>
-			<Dashboard />
+			<div style={{ marginTop: "0.5rem" }}>
+				<Dashboard />
+			</div>
 		</section>
 
 		<section>
 			<h2>4. Sequential Loading Steps</h2>
 			<p>Multi-step process with status updates.</p>
-			<SequentialLoad />
+			<div style={{ marginTop: "0.5rem" }}>
+				<SequentialLoad />
+			</div>
 		</section>
 	</div>
 );
