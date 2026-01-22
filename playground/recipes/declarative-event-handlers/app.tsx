@@ -13,27 +13,16 @@ import { mount } from "@/api";
 // Example 1: Plain Callback Handlers
 // ============================================================================
 
-const Counter = () => {
-	let count = 0;
-	const countStream = Stream.async<number>((emit) => {
-		emit.single(count);
-	});
-
-	return (
-		<div>
-			<span>Count: {countStream}</span>
-			<button
-				type="button"
-				onclick={() => {
-					count++;
-					// Note: This is a simple example. In real apps, you'd emit to a stream.
-				}}
-			>
-				Increment
-			</button>
-		</div>
-	);
-};
+const AlertButton = () => (
+	<button
+		type="button"
+		onclick={() => {
+			window.alert("Hello from a plain callback!");
+		}}
+	>
+		Show Alert
+	</button>
+);
 
 // ============================================================================
 // Example 2: Effect-Returning Handlers
@@ -137,7 +126,7 @@ const App = () => (
 
 		<section>
 			<h2>1. Plain Callback</h2>
-			<Counter />
+			<AlertButton />
 		</section>
 
 		<section>
