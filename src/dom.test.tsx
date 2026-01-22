@@ -1322,3 +1322,196 @@ describe("AC26: Cleanup and Unmount", () => {
 		);
 	});
 });
+
+// ============================================================================
+// Stream-Based Fallback Pattern
+// ============================================================================
+
+describe("Stream-Based Fallback Pattern", () => {
+	it("should render fallback immediately then update with actual content", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		// Component using Stream.concat for fallback pattern
+		// Use 300ms delay to ensure we can check fallback before it resolves
+		function AsyncComponent() {
+			return Stream.concat(
+				Stream.make("Loading..."),
+				Stream.fromEffect(
+					Effect.promise(
+						() =>
+							new Promise<string>((resolve) =>
+								setTimeout(() => resolve("Actual Content"), 300),
+							),
+					),
+				),
+			);
+		}
+
+		await runMount(<AsyncComponent />, root);
+
+		// Fallback should appear immediately (wait just 50ms for stream setup)
+		await waitFor(50);
+		assert.equal(root.textContent, "Loading...");
+
+		// After delay, actual content should replace fallback
+		await waitFor(350);
+		assert.equal(root.textContent, "Actual Content");
+	});
+
+	it("should handle JSX elements in fallback pattern", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		function AsyncComponent() {
+			return Stream.concat(
+				Stream.make(<span class="loading">?</span>),
+				Stream.fromEffect(
+					Effect.promise(
+						() =>
+							new Promise<JSX.Element>((resolve) =>
+								setTimeout(
+									() => resolve(<span class="loaded">Done</span>),
+									300,
+								),
+							),
+					),
+				),
+			);
+		}
+
+		await runMount(
+			<div>
+				<AsyncComponent />
+			</div>,
+			root,
+		);
+
+		await waitFor(50);
+		const loadingSpan = root.querySelector(".loading");
+		assert.ok(loadingSpan, "Loading span should be present initially");
+
+		await waitFor(350);
+		const loadedSpan = root.querySelector(".loaded");
+		assert.ok(loadedSpan, "Loaded span should replace loading span");
+		assert.ok(
+			!root.querySelector(".loading"),
+			"Loading span should be removed",
+		);
+	});
+
+	it("should work with multiple fallback components independently", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		function AsyncA() {
+			return Stream.concat(
+				Stream.make("A-loading"),
+				Stream.fromEffect(
+					Effect.promise(
+						() =>
+							new Promise<string>((resolve) =>
+								setTimeout(() => resolve("A-done"), 150),
+							),
+					),
+				),
+			);
+		}
+
+		function AsyncB() {
+			return Stream.concat(
+				Stream.make("B-loading"),
+				Stream.fromEffect(
+					Effect.promise(
+						() =>
+							new Promise<string>((resolve) =>
+								setTimeout(() => resolve("B-done"), 400),
+							),
+					),
+				),
+			);
+		}
+
+		await runMount(
+			<div>
+				<AsyncA />-<AsyncB />
+			</div>,
+			root,
+		);
+
+		// Both should show loading initially
+		await waitFor(50);
+		assert.ok(root.textContent?.includes("A-loading"));
+		assert.ok(root.textContent?.includes("B-loading"));
+
+		// A finishes first
+		await waitFor(200);
+		assert.ok(root.textContent?.includes("A-done"));
+		assert.ok(root.textContent?.includes("B-loading"));
+
+		// B finishes later
+		await waitFor(300);
+		assert.ok(root.textContent?.includes("A-done"));
+		assert.ok(root.textContent?.includes("B-done"));
+	});
+
+	it("should not inherit fallback from parent components", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		function Child() {
+			return Stream.concat(
+				Stream.make(<span class="child-loading">Child Loading...</span>),
+				Stream.fromEffect(
+					Effect.promise(
+						() =>
+							new Promise<JSX.Element>((resolve) =>
+								setTimeout(
+									() => resolve(<span class="child-loaded">Child Done</span>),
+									200,
+								),
+							),
+					),
+				),
+			);
+		}
+
+		function Parent() {
+			return Stream.concat(
+				Stream.make(<div class="parent-loading">Parent Loading...</div>),
+				Stream.fromEffect(
+					Effect.promise(
+						() =>
+							new Promise<JSX.Element>((resolve) =>
+								setTimeout(
+									() =>
+										resolve(
+											<div class="parent-loaded">
+												<Child />
+											</div>,
+										),
+									100,
+								),
+							),
+					),
+				),
+			);
+		}
+
+		await runMount(<Parent />, root);
+
+		// Parent loading appears first
+		await waitFor(50);
+		assert.ok(root.querySelector(".parent-loading"));
+
+		// Parent loaded, child loading should appear
+		await waitFor(150);
+		assert.ok(root.querySelector(".child-loading"));
+		assert.ok(!root.querySelector(".parent-loading"));
+
+		// Child loaded
+		await waitFor(250);
+		assert.ok(root.querySelector(".child-loaded"));
+		assert.ok(!root.querySelector(".child-loading"));
+	});
+});
