@@ -43,9 +43,21 @@ const Greeting = () =>
 
 const App = () => (
 	<div>
-		<Greeting />
+		<a href="../" class="back-link">
+			&larr; Back to Recipes
+		</a>
+		<h1>Type Augmentation</h1>
+		<div class="demo-section">
+			<h2>Service-Provided Greeting</h2>
+			<Greeting />
+		</div>
 	</div>
 );
 
 // Provide all services at the mount boundary
-Effect.runPromise(mount(<App />, document.body).pipe(Effect.provide(AppLayer)));
+Effect.runPromise(
+	// biome-ignore lint/style/noNonNullAssertion: playground code, element always exists
+	mount(<App />, document.getElementById("root")!).pipe(
+		Effect.provide(AppLayer),
+	),
+);

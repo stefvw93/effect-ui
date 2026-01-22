@@ -10,30 +10,63 @@ import { Context, Effect, Layer, Stream } from "effect";
 import { mount } from "@/api";
 
 // ============================================================================
-// Example 1: Plain Callback Handlers
+// Example 1: Stream Composition Counter
 // ============================================================================
 
-const Counter = () => {
-	let count = 0;
-	const countStream = Stream.async<number>((emit) => {
-		emit.single(count);
-	});
+/**
+ * A counter built entirely from stream composition, demonstrating:
+ * - Effect.andThen to wait for DOM readiness
+ * - Stream.fromEventListener for click events
+ * - Stream.merge to combine increment/decrement streams
+ * - Stream.scan to accumulate state
+ * - Stream.concat for initial value
+ */
+const StreamCounter = () =>
+	Effect.gen(function* () {
+		// Generate unique IDs for this instance
+		const incId = `inc-${Math.random().toString(36).slice(2, 8)}`;
+		const decId = `dec-${Math.random().toString(36).slice(2, 8)}`;
 
-	return (
-		<div>
-			<span>Count: {countStream}</span>
-			<button
-				type="button"
-				onclick={() => {
-					count++;
-					// Note: This is a simple example. In real apps, you'd emit to a stream.
-				}}
-			>
-				Increment
-			</button>
-		</div>
-	);
-};
+		// Build a reactive count stream using composition
+		const clickStream = Stream.fromEffect(
+			// Wait for DOM to be ready (next microtask after mount)
+			Effect.andThen(
+				Effect.promise(() => Promise.resolve(true)),
+				() =>
+					Effect.sync(() => ({
+						// biome-ignore lint/style/noNonNullAssertion: buttons exist after mount
+						incBtn: document.getElementById(incId)!,
+						// biome-ignore lint/style/noNonNullAssertion: buttons exist after mount
+						decBtn: document.getElementById(decId)!,
+					})),
+			),
+		).pipe(
+			// Create click streams and merge them with +1/-1 values
+			Stream.flatMap(({ incBtn, decBtn }) =>
+				Stream.merge(
+					Stream.fromEventListener(incBtn, "click").pipe(Stream.map(() => 1)),
+					Stream.fromEventListener(decBtn, "click").pipe(Stream.map(() => -1)),
+				),
+			),
+			// Accumulate the count
+			Stream.scan(0, (acc, delta) => acc + delta),
+		);
+
+		// Prepend initial value of 0
+		const count = Stream.concat(Stream.make(0), clickStream);
+
+		return (
+			<div>
+				<span class="counter">{count}</span>
+				<button type="button" id={decId}>
+					-
+				</button>
+				<button type="button" id={incId}>
+					+
+				</button>
+			</div>
+		);
+	});
 
 // ============================================================================
 // Example 2: Effect-Returning Handlers
@@ -129,12 +162,16 @@ const ConditionalButton = ({ enabled }: { enabled: boolean }) => (
 // ============================================================================
 
 const App = () => (
-	<div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+	<div>
+		<a href="../" class="back-link">
+			&larr; Back to Recipes
+		</a>
 		<h1>Event Handler Examples</h1>
 
 		<section>
-			<h2>1. Plain Callback</h2>
-			<Counter />
+			<h2>1. Stream Composition Counter</h2>
+			<p>Built from Stream.fromEventListener, merge, and scan.</p>
+			<StreamCounter />
 		</section>
 
 		<section>
@@ -162,5 +199,8 @@ const App = () => (
 
 // Mount with services provided
 Effect.runPromise(
-	mount(<App />, document.body).pipe(Effect.provide(AnalyticsLive)),
+	// biome-ignore lint/style/noNonNullAssertion: playground code, element always exists
+	mount(<App />, document.getElementById("root")!).pipe(
+		Effect.provide(AnalyticsLive),
+	),
 );
