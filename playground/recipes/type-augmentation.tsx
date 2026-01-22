@@ -9,7 +9,7 @@
  * error if a component uses a service not registered in the interface.
  */
 
-import { Context, Effect, Layer, Stream } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { mount } from "@/api";
 
 // Define your services
@@ -35,13 +35,11 @@ const AppLayer = Layer.merge(MyValueLayer, ThemeLayer);
 
 // Components can now use registered services with full type safety
 const Greeting = () =>
-	Stream.fromEffect(
-		Effect.gen(function* () {
-			const { value } = yield* MyValue;
-			const { primary } = yield* Theme;
-			return <span style={{ color: primary }}>{value}</span>;
-		}),
-	);
+	Effect.gen(function* () {
+		const { value } = yield* MyValue;
+		const { primary } = yield* Theme;
+		return <span style={{ color: primary }}>{value}</span>;
+	});
 
 const App = () => (
 	<div>

@@ -1,6 +1,22 @@
-export type EventHandler<T, E extends Event> = (
+import type { Effect, Stream } from "effect";
+
+/**
+ * Event handler function that can return void or an Effect.
+ * Effects are automatically run with the runtime from mount context.
+ */
+export type EventHandlerFn<T, E extends Event> = (
 	e: E & { currentTarget: T; target: Element },
-) => void;
+) => void | Effect.Effect<void, unknown, unknown>;
+
+/**
+ * Event handler type following the AttributeValue pattern.
+ * Supports static handlers, Stream<Handler>, or Effect<Handler>.
+ */
+export type EventHandler<T, E extends Event> =
+	| EventHandlerFn<T, E>
+	| Stream.Stream<EventHandlerFn<T, E> | null | false>
+	| Effect.Effect<EventHandlerFn<T, E> | null | false>;
+
 export interface DOMAttributes<T> {
 	onabort?: null | false | EventHandler<T, Event>;
 	onanimationend?: null | false | EventHandler<T, AnimationEvent>;
