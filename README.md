@@ -41,6 +41,77 @@ const app = (
 Effect.runPromise(mount(app, document.getElementById("root")!));
 ```
 
+## Examples
+
+### Reactive State
+
+```tsx
+import { Effect, Stream, SubscriptionRef } from "effect";
+
+const Counter = () =>
+  Effect.gen(function* () {
+    const count = yield* SubscriptionRef.make(0);
+
+    return (
+      <div>
+        <span>{count.changes}</span>
+        <button onclick={() => SubscriptionRef.update(count, n => n + 1)}>+</button>
+        <button onclick={() => SubscriptionRef.update(count, n => n - 1)}>-</button>
+      </div>
+    );
+  });
+```
+
+### Async Data Loading
+
+```tsx
+const UserProfile = ({ id }: { id: number }) =>
+  Stream.concat(
+    Stream.make(<div>Loading...</div>),
+    Stream.fromEffect(
+      Effect.gen(function* () {
+        const user = yield* fetchUser(id);
+        return <div>{user.name}</div>;
+      })
+    )
+  );
+```
+
+### Effect Event Handlers
+
+```tsx
+const SaveButton = () => (
+  <button
+    onclick={() =>
+      Effect.gen(function* () {
+        yield* Effect.log("Saving...");
+        yield* saveData();
+        yield* Effect.log("Done!");
+      })
+    }
+  >
+    Save
+  </button>
+);
+```
+
+### Derived Streams
+
+```tsx
+const count = yield* SubscriptionRef.make(0);
+
+const doubled = Stream.map(count.changes, n => n * 2);
+const isEven = Stream.map(count.changes, n => n % 2 === 0 ? "Yes" : "No");
+
+return (
+  <div>
+    <p>Count: {count.changes}</p>
+    <p>Doubled: {doubled}</p>
+    <p>Even: {isEven}</p>
+  </div>
+);
+```
+
 ## Interactive Playground
 
 The project includes a Vite-powered playground with interactive examples demonstrating Effect UI's capabilities.
