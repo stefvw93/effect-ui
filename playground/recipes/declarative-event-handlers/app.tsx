@@ -10,19 +10,67 @@ import { Context, Effect, Layer, Stream } from "effect";
 import { mount } from "@/api";
 
 // ============================================================================
-// Example 1: Plain Callback Handlers
+// Example 1: Stream Composition Counter
 // ============================================================================
 
-const AlertButton = () => (
-	<button
-		type="button"
-		onclick={() => {
-			window.alert("Hello from a plain callback!");
-		}}
-	>
-		Show Alert
-	</button>
-);
+/**
+ * A counter built entirely from stream composition, demonstrating:
+ * - Effect.andThen to wait for DOM readiness
+ * - Stream.fromEventListener for click events
+ * - Stream.merge to combine increment/decrement streams
+ * - Stream.scan to accumulate state
+ * - Stream.concat for initial value
+ */
+const StreamCounter = () =>
+	Effect.gen(function* () {
+		// Generate unique IDs for this instance
+		const incId = `inc-${Math.random().toString(36).slice(2, 8)}`;
+		const decId = `dec-${Math.random().toString(36).slice(2, 8)}`;
+
+		// Build a reactive count stream using composition
+		const clickStream = Stream.fromEffect(
+			// Wait for DOM to be ready (next microtask after mount)
+			Effect.andThen(
+				Effect.promise(() => Promise.resolve(true)),
+				() =>
+					Effect.sync(() => ({
+						// biome-ignore lint/style/noNonNullAssertion: buttons exist after mount
+						incBtn: document.getElementById(incId)!,
+						// biome-ignore lint/style/noNonNullAssertion: buttons exist after mount
+						decBtn: document.getElementById(decId)!,
+					})),
+			),
+		).pipe(
+			// Create click streams and merge them with +1/-1 values
+			Stream.flatMap(({ incBtn, decBtn }) =>
+				Stream.merge(
+					Stream.fromEventListener(incBtn, "click").pipe(
+						Stream.map(() => 1 as number),
+					),
+					Stream.fromEventListener(decBtn, "click").pipe(
+						Stream.map(() => -1 as number),
+					),
+				),
+			),
+			// Accumulate the count
+			Stream.scan(0, (acc, delta) => acc + delta),
+		);
+
+		// Prepend initial value of 0
+		const count = Stream.concat(Stream.make(0), clickStream);
+
+		return (
+			<div>
+				<span class="counter">{count}</span>
+				<button type="button" id={decId}>
+					-
+				</button>
+				<button type="button" id={incId}>
+					+
+				</button>
+			</div>
+		);
+	});
 
 // ============================================================================
 // Example 2: Effect-Returning Handlers
@@ -125,8 +173,9 @@ const App = () => (
 		<h1>Event Handler Examples</h1>
 
 		<section>
-			<h2>1. Plain Callback</h2>
-			<AlertButton />
+			<h2>1. Stream Composition Counter</h2>
+			<p>Built from Stream.fromEventListener, merge, and scan.</p>
+			<StreamCounter />
 		</section>
 
 		<section>
