@@ -5,7 +5,7 @@
  * validation, and Effect-powered submit handlers.
  */
 
-import { Effect, Stream } from "effect";
+import { Effect, Either, Schema, Stream } from "effect";
 import { mount } from "@/api";
 
 // ============================================================================
@@ -56,35 +56,50 @@ const BasicInput = () => {
 };
 
 // ============================================================================
-// Example 2: Email Validation
+// Example 2: Schema Validation
 // ============================================================================
 
-const EmailInput = () => {
+// Define a Schema for email validation
+const Email = Schema.String.pipe(
+	Schema.filter((s) => s.length > 0, { message: () => "Email is required" }),
+	Schema.filter((s) => s.includes("@"), { message: () => "Must contain @" }),
+	Schema.filter((s) => s.includes("."), {
+		message: () => "Must contain a domain",
+	}),
+);
+
+const SchemaEmailInput = () => {
 	const [emailStream, setEmail] = createEmitter("");
 
+	// Validate using Schema.decodeUnknownEither
 	const validationStream = Stream.map(emailStream, (email) => {
-		if (email.length === 0) return null;
-		if (!email.includes("@")) return "Must contain @";
-		if (!email.includes(".")) return "Must contain a domain";
-		return null;
+		if (email.length === 0) return { valid: false, error: null };
+		const result = Schema.decodeUnknownEither(Email)(email);
+		return Either.match(result, {
+			onLeft: (e) => ({
+				valid: false,
+				error: e.message.split(":").pop()?.trim() ?? "Invalid",
+			}),
+			onRight: () => ({ valid: true, error: null }),
+		});
 	});
 
 	return (
 		<div class="form-group">
 			{/* biome-ignore lint/a11y/noLabelWithoutControl: input is sibling */}
-			<label>Email</label>
+			<label>Email (Schema validated)</label>
 			<input
 				type="email"
 				placeholder="user@example.com"
 				oninput={(e) => setEmail((e.target as HTMLInputElement).value)}
 			/>
 			<div>
-				{Stream.map(validationStream, (error) =>
+				{Stream.map(validationStream, ({ valid, error }) =>
 					error ? (
 						<span class="error-text">{error}</span>
-					) : (
+					) : valid ? (
 						<span class="success-text">Valid email</span>
-					),
+					) : null,
 				)}
 			</div>
 		</div>
@@ -162,7 +177,147 @@ const LoginForm = () => {
 };
 
 // ============================================================================
-// Example 5: Live Search Preview
+// Example 5: Complete Form with Schema Validation
+// ============================================================================
+
+// Define schemas for each field
+const Username = Schema.String.pipe(
+	Schema.filter((s) => s.length >= 3, {
+		message: () => "Min 3 characters",
+	}),
+	Schema.filter((s) => /^[a-zA-Z0-9_]+$/.test(s), {
+		message: () => "Only letters, numbers, underscore",
+	}),
+);
+
+const Password = Schema.String.pipe(
+	Schema.filter((s) => s.length >= 8, {
+		message: () => "Min 8 characters",
+	}),
+	Schema.filter((s) => /[A-Z]/.test(s), {
+		message: () => "Must contain uppercase",
+	}),
+	Schema.filter((s) => /[0-9]/.test(s), {
+		message: () => "Must contain number",
+	}),
+);
+
+const Age = Schema.String.pipe(
+	Schema.filter((s) => /^\d+$/.test(s), {
+		message: () => "Must be a number",
+	}),
+	Schema.transform(Schema.Number, {
+		decode: (s) => Number.parseInt(s, 10),
+		encode: (n) => String(n),
+	}),
+	Schema.filter((n) => n >= 18, { message: () => "Must be 18 or older" }),
+	Schema.filter((n) => n <= 120, { message: () => "Invalid age" }),
+);
+
+// Helper to validate a field
+const validateField = <A, I>(schema: Schema.Schema<A, I>, value: I) => {
+	const result = Schema.decodeUnknownEither(schema)(value);
+	return Either.match(result, {
+		onLeft: (e) => e.message.split(":").pop()?.trim() ?? "Invalid",
+		onRight: () => null,
+	});
+};
+
+const SchemaForm = () => {
+	const [usernameStream, setUsername] = createEmitter("");
+	const [passwordStream, setPassword] = createEmitter("");
+	const [ageStream, setAge] = createEmitter("");
+	const [statusStream, setStatus] = createEmitter<string | null>(null);
+
+	const usernameError = Stream.map(usernameStream, (v) =>
+		v ? validateField(Username, v) : null,
+	);
+	const passwordError = Stream.map(passwordStream, (v) =>
+		v ? validateField(Password, v) : null,
+	);
+	const ageError = Stream.map(ageStream, (v) =>
+		v ? validateField(Age, v) : null,
+	);
+
+	// Check if form is valid (all fields filled and no errors)
+	const isValid = Stream.zipLatestWith(
+		Stream.zipLatestWith(usernameStream, passwordStream, (u, p) => ({
+			u,
+			p,
+		})),
+		ageStream,
+		({ u, p }, a) =>
+			u.length > 0 &&
+			p.length > 0 &&
+			a.length > 0 &&
+			!validateField(Username, u) &&
+			!validateField(Password, p) &&
+			!validateField(Age, a),
+	);
+
+	return (
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				return Effect.gen(function* () {
+					setStatus("Validating...");
+					yield* Effect.sleep("500 millis");
+					setStatus("Registration successful!");
+				});
+			}}
+		>
+			<div class="form-group">
+				{/* biome-ignore lint/a11y/noLabelWithoutControl: input is sibling */}
+				<label>Username</label>
+				<input
+					type="text"
+					placeholder="min 3 chars, alphanumeric"
+					oninput={(e) => setUsername((e.target as HTMLInputElement).value)}
+				/>
+				{Stream.map(usernameError, (err) =>
+					err ? <span class="error-text">{err}</span> : null,
+				)}
+			</div>
+			<div class="form-group">
+				{/* biome-ignore lint/a11y/noLabelWithoutControl: input is sibling */}
+				<label>Password</label>
+				<input
+					type="password"
+					placeholder="min 8 chars, uppercase + number"
+					oninput={(e) => setPassword((e.target as HTMLInputElement).value)}
+				/>
+				{Stream.map(passwordError, (err) =>
+					err ? <span class="error-text">{err}</span> : null,
+				)}
+			</div>
+			<div class="form-group">
+				{/* biome-ignore lint/a11y/noLabelWithoutControl: input is sibling */}
+				<label>Age</label>
+				<input
+					type="text"
+					placeholder="18+"
+					oninput={(e) => setAge((e.target as HTMLInputElement).value)}
+				/>
+				{Stream.map(ageError, (err) =>
+					err ? <span class="error-text">{err}</span> : null,
+				)}
+			</div>
+			<button type="submit">
+				{Stream.map(isValid, (valid) =>
+					valid ? "Register" : "Fill all fields",
+				)}
+			</button>
+			<div class="preview">
+				{Stream.map(statusStream, (status) =>
+					status ? <span>{status}</span> : null,
+				)}
+			</div>
+		</form>
+	);
+};
+
+// ============================================================================
+// Example 6: Live Search Preview
 // ============================================================================
 
 const SearchPreview = () => {
@@ -218,8 +373,8 @@ const App = () => (
 		</section>
 
 		<section>
-			<h2>2. Email Validation</h2>
-			<EmailInput />
+			<h2>2. Schema Validation</h2>
+			<SchemaEmailInput />
 		</section>
 
 		<section>
@@ -233,7 +388,12 @@ const App = () => (
 		</section>
 
 		<section>
-			<h2>5. Live Search Preview</h2>
+			<h2>5. Complete Schema Form</h2>
+			<SchemaForm />
+		</section>
+
+		<section>
+			<h2>6. Live Search Preview</h2>
 			<SearchPreview />
 		</section>
 	</div>

@@ -68,15 +68,42 @@ const isEven = Stream.map(count.changes, n => n % 2 === 0);
 <span>Even: {isEven}</span>
 ```
 
-### Object State
+### Object State with Schema Validation
 ```typescript
-const form = yield* SubscriptionRef.make({ name: "", email: "" });
+import { Schema, Either } from "effect";
+
+// Define schemas
+const Name = Schema.String.pipe(
+  Schema.filter((s) => s.length >= 2, { message: () => "Min 2 chars" }),
+);
+
+// Helper to validate
+const validate = <A, I>(schema: Schema.Schema<A, I>, value: I) => {
+  if (!value) return null;
+  const result = Schema.decodeUnknownEither(schema)(value);
+  return Either.match(result, {
+    onLeft: (e) => e.message.split(":").pop()?.trim() ?? "Invalid",
+    onRight: () => null,
+  });
+};
+
+// Form state includes values and errors
+const form = yield* SubscriptionRef.make({
+  name: "",
+  errors: { name: null as string | null },
+});
 
 const updateName = (name: string) =>
-  SubscriptionRef.update(form, state => ({ ...state, name }));
+  SubscriptionRef.update(form, (state) => ({
+    ...state,
+    name,
+    errors: { ...state.errors, name: validate(Name, name) },
+  }));
 
 <input oninput={(e) => updateName(e.target.value)} />
-<pre>{Stream.map(form.changes, JSON.stringify)}</pre>
+{Stream.map(form.changes, (s) =>
+  s.errors.name ? <span class="error">{s.errors.name}</span> : null
+)}
 ```
 
 ### Combining Multiple Refs

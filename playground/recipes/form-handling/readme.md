@@ -60,13 +60,26 @@ function createEmitter<T>(initial: T) {
 }
 ```
 
-### Validation Stream
+### Schema Validation
 ```typescript
+import { Schema, Either } from "effect";
+
+// Define validation rules with Schema
+const Email = Schema.String.pipe(
+  Schema.filter((s) => s.includes("@"), { message: () => "Must contain @" }),
+  Schema.filter((s) => s.includes("."), { message: () => "Must have domain" }),
+);
+
 const [emailStream, setEmail] = createEmitter("");
 
+// Validate using Schema.decodeUnknownEither
 const validationStream = Stream.map(emailStream, (email) => {
-  if (!email.includes("@")) return "Invalid email";
-  return null;
+  if (!email) return null;
+  const result = Schema.decodeUnknownEither(Email)(email);
+  return Either.match(result, {
+    onLeft: (e) => e.message.split(":").pop()?.trim() ?? "Invalid",
+    onRight: () => null,
+  });
 });
 
 <input oninput={(e) => setEmail(e.target.value)} />

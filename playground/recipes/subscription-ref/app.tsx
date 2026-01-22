@@ -1,5 +1,5 @@
 /**
- * Recipe: SubscriptionRef (Reactive Signals)
+ * Recipe: SubscriptionRef
  *
  * This recipe demonstrates using Effect's SubscriptionRef as a reactive
  * state primitive, similar to signals in SolidJS or stores in Svelte.
@@ -10,7 +10,7 @@
  * - Integration with Effect's ecosystem
  */
 
-import { Effect, Stream, SubscriptionRef } from "effect";
+import { Effect, Either, Schema, Stream, SubscriptionRef } from "effect";
 import { mount } from "@/api";
 
 // ============================================================================
@@ -20,16 +20,8 @@ import { mount } from "@/api";
 const Counter = () =>
 	Effect.gen(function* () {
 		const count = yield* SubscriptionRef.make(0);
-
-		const increment = () =>
-			Effect.gen(function* () {
-				yield* SubscriptionRef.update(count, (n) => n + 1);
-			});
-
-		const decrement = () =>
-			Effect.gen(function* () {
-				yield* SubscriptionRef.update(count, (n) => n - 1);
-			});
+		const increment = () => SubscriptionRef.update(count, (n) => n + 1);
+		const decrement = () => SubscriptionRef.update(count, (n) => n - 1);
 
 		return (
 			<div>
@@ -83,26 +75,70 @@ const DerivedState = () =>
 	});
 
 // ============================================================================
-// Example 3: Object State
+// Example 3: Object State with Schema Validation
 // ============================================================================
 
+// Define schemas for form fields
+const Name = Schema.String.pipe(
+	Schema.filter((s) => s.length >= 2, { message: () => "Min 2 characters" }),
+);
+
+const Email = Schema.String.pipe(
+	Schema.filter((s) => s.includes("@"), { message: () => "Must contain @" }),
+	Schema.filter((s) => s.includes("."), { message: () => "Must have domain" }),
+);
+
+// Form state includes both values and validation errors
 interface FormState {
 	name: string;
 	email: string;
+	errors: { name: string | null; email: string | null };
 }
+
+// Helper to validate and extract error message
+const validate = <A, I>(
+	schema: Schema.Schema<A, I>,
+	value: I,
+): string | null => {
+	if (!value) return null;
+	const result = Schema.decodeUnknownEither(schema)(value);
+	return Either.match(result, {
+		onLeft: (e) => e.message.split(":").pop()?.trim() ?? "Invalid",
+		onRight: () => null,
+	});
+};
 
 const ObjectState = () =>
 	Effect.gen(function* () {
 		const form = yield* SubscriptionRef.make<FormState>({
 			name: "",
 			email: "",
+			errors: { name: null, email: null },
 		});
 
 		const updateName = (name: string) =>
-			SubscriptionRef.update(form, (state) => ({ ...state, name }));
+			SubscriptionRef.update(form, (state) => ({
+				...state,
+				name,
+				errors: { ...state.errors, name: validate(Name, name) },
+			}));
 
 		const updateEmail = (email: string) =>
-			SubscriptionRef.update(form, (state) => ({ ...state, email }));
+			SubscriptionRef.update(form, (state) => ({
+				...state,
+				email,
+				errors: { ...state.errors, email: validate(Email, email) },
+			}));
+
+		// Derived: check if form is valid
+		const isValid = Stream.map(
+			form.changes,
+			(s) =>
+				s.name.length > 0 &&
+				s.email.length > 0 &&
+				!s.errors.name &&
+				!s.errors.email,
+		);
 
 		return (
 			<div>
@@ -111,25 +147,44 @@ const ObjectState = () =>
 					<label>Name: </label>
 					<input
 						type="text"
-						placeholder="Enter name"
+						placeholder="Min 2 characters"
 						oninput={(e) => updateName((e.target as HTMLInputElement).value)}
 					/>
+					{Stream.map(form.changes, (s) =>
+						s.errors.name ? (
+							<span style={{ color: "#c00", marginLeft: "0.5rem" }}>
+								{s.errors.name}
+							</span>
+						) : null,
+					)}
 				</div>
 				<div style={{ marginBottom: "0.5rem" }}>
 					{/* biome-ignore lint/a11y/noLabelWithoutControl: input is sibling */}
 					<label>Email: </label>
 					<input
 						type="email"
-						placeholder="Enter email"
+						placeholder="user@example.com"
 						oninput={(e) => updateEmail((e.target as HTMLInputElement).value)}
 					/>
-				</div>
-				<div class="preview">
-					{Stream.map(
-						form.changes,
-						(state) => `Name: ${state.name}\nEmail: ${state.email}`,
+					{Stream.map(form.changes, (s) =>
+						s.errors.email ? (
+							<span style={{ color: "#c00", marginLeft: "0.5rem" }}>
+								{s.errors.email}
+							</span>
+						) : null,
 					)}
 				</div>
+				<div class="preview">
+					{Stream.map(form.changes, (s) =>
+						s.name || s.email
+							? `Name: ${s.name}\nEmail: ${s.email}`
+							: "(empty)",
+					)}
+				</div>
+				<p style={{ marginTop: "0.5rem" }}>
+					Valid:{" "}
+					<strong>{Stream.map(isValid, (v) => (v ? "Yes" : "No"))}</strong>
+				</p>
 			</div>
 		);
 	});
@@ -271,8 +326,8 @@ const App = () => (
 		</section>
 
 		<section>
-			<h2>3. Object State</h2>
-			<p>Manage form state as an object.</p>
+			<h2>3. Object State with Schema</h2>
+			<p>Form state with Schema validation.</p>
 			<ObjectState />
 		</section>
 
