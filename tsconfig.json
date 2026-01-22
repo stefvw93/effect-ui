@@ -1,6 +1,10 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
-	"exclude": ["dist/**/*"],
+	"exclude": [
+		"dist/**/*",
+		"playground/recipes/**/*",
+		"src/**/__type-tests__/**/*"
+	],
 
 	"compilerOptions": {
 		"module": "esnext",

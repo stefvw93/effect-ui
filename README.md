@@ -1,7 +1,6 @@
 # Effect UI
 
-[![CI](https://github.com/stefvw93/effect-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/stefvw93/effect-ui/actions/workflows/ci.yml)
-[![PR Validation](https://github.com/stefvw93/effect-ui/actions/workflows/pr-validation.yml/badge.svg)](https://github.com/stefvw93/effect-ui/actions/workflows/pr-validation.yml)
+[![CI + Release](https://github.com/stefvw93/effect-ui/actions/workflows/ci-release.yml/badge.svg)](https://github.com/stefvw93/effect-ui/actions/workflows/ci-release.yml)
 
 A reactive DOM rendering library built on [Effect](https://effect.website) that enables declarative UI with streams and automatic updates.
 
