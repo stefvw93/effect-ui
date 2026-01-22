@@ -1,3 +1,4 @@
+import type { Option, Ref } from "effect";
 import type { AriaAttributes } from "./aria";
 import type {
 	DOMAttributes,
@@ -109,7 +110,10 @@ export type HTMLRole =
 	| "widget"
 	| "window";
 export interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+	// effect-ui internals ========================================================
 	children?: AttributeValue<JSXChild>;
+	ref?: Ref.Ref<Option.Option<T>>;
+	// ============================================================================
 
 	/**
 	 * Provides a hint for generating a keyboard shortcut for the current element. This attribute consists of a space-separated list of characters. The browser should use the first one that exists on the computer keyboard layout.

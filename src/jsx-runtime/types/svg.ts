@@ -1,3 +1,4 @@
+import type { Option, Ref } from "effect";
 import type { DOMAttributes } from "./dom";
 import type { AttributeValue, JSXChild, StyleAttributeValue } from "./values";
 
@@ -62,7 +63,11 @@ type ImagePreserveAspectRatio =
 	| "defer xMaxYMax slice";
 type SVGUnits = "userSpaceOnUse" | "objectBoundingBox";
 export interface SVGAttributes<T> extends DOMAttributes<T> {
+	// effect-ui internals ========================================================
 	children?: AttributeValue<JSXChild>;
+	ref?: Ref.Ref<Option.Option<T>>;
+	// ============================================================================
+
 	id?: AttributeValue<string>;
 	lang?: AttributeValue<string>;
 	/**
