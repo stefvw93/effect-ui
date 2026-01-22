@@ -1,4 +1,4 @@
-import { Effect, pipe, Scope, Stream } from "effect";
+import { Effect, Option, pipe, Ref, Scope, Stream } from "effect";
 import { RenderContext } from "./render-core";
 import type { StreamSubscriptionError } from "./types";
 import { isStream, normalizeToStream } from "./utilities";
@@ -40,6 +40,15 @@ export function setElementProps(
 			// Event handlers (onclick, onchange, etc.)
 			if (isEventHandler(key)) {
 				yield* setEventHandler(element, key, value);
+				continue;
+			}
+
+			if (
+				key === "ref" &&
+				typeof value === "object" &&
+				Ref.RefTypeId in value
+			) {
+				yield* Ref.set(value, Option.some(element));
 				continue;
 			}
 
