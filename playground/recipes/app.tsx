@@ -49,6 +49,12 @@ const recipes = [
 		name: "SubscriptionRef",
 		description: "Reactive state with SubscriptionRef and .changes streams",
 	},
+	{
+		slug: "element-ref",
+		name: "Element Ref",
+		description:
+			"Direct DOM element access via Ref for focus, measurement, and imperative operations",
+	},
 ];
 
 const RecipeCard = ({

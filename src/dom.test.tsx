@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { Effect, Schedule, Stream } from "effect";
+import { Effect, Option, Ref, Schedule, Stream, SubscriptionRef } from "effect";
 import { JSDOM } from "jsdom";
 import { mount } from "./api";
 
@@ -1513,5 +1513,280 @@ describe("Stream-Based Fallback Pattern", () => {
 		await waitFor(250);
 		assert.ok(root.querySelector(".child-loaded"));
 		assert.ok(!root.querySelector(".child-loading"));
+	});
+});
+
+// ============================================================================
+// Ref Handling
+// ============================================================================
+
+describe("Ref Handling", () => {
+	it("should set ref to Option.some(element) during element creation", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const ref = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLElement>>(Option.none()),
+		);
+
+		await runMount(<div ref={ref}>test</div>, root);
+
+		const refValue = await Effect.runPromise(Ref.get(ref));
+		assert.ok(Option.isSome(refValue), "Ref should contain Option.some");
+		const element = Option.getOrThrow(refValue);
+		assert.equal(element.tagName, "DIV");
+		assert.equal(element.textContent, "test");
+	});
+
+	it("should work with SubscriptionRef", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const ref = await Effect.runPromise(
+			SubscriptionRef.make<Option.Option<HTMLElement>>(Option.none()),
+		);
+
+		await runMount(
+			<span ref={ref} class="test-span">
+				content
+			</span>,
+			root,
+		);
+
+		const refValue = await Effect.runPromise(Ref.get(ref));
+		assert.ok(
+			Option.isSome(refValue),
+			"SubscriptionRef should contain Option.some",
+		);
+		const element = Option.getOrThrow(refValue);
+		assert.equal(element.tagName, "SPAN");
+		assert.equal(element.className, "test-span");
+	});
+
+	it("should emit on SubscriptionRef.changes after mount", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		// Create the ref and track if we received an element via the stream
+		let receivedElement: HTMLInputElement | null = null;
+
+		await Effect.runPromise(
+			Effect.gen(function* () {
+				const ref = yield* SubscriptionRef.make<
+					Option.Option<HTMLInputElement>
+				>(Option.none());
+
+				// Subscribe to changes and capture the first Option.some emission
+				yield* Effect.fork(
+					Stream.runForEach(Stream.filter(ref.changes, Option.isSome), (opt) =>
+						Effect.sync(() => {
+							if (receivedElement === null) {
+								receivedElement = Option.getOrThrow(opt);
+							}
+						}),
+					),
+				);
+
+				// Give the subscription time to start
+				yield* Effect.sleep("50 millis");
+
+				// Mount will set the ref
+				return <input ref={ref} type="text" />;
+			}).pipe(
+				Effect.flatMap((jsx) =>
+					Effect.promise(async () => {
+						await runMount(jsx, root);
+					}),
+				),
+			),
+		);
+
+		// Wait for emission to be processed
+		await waitForStream();
+
+		// Verify we received the element through the subscription
+		assert.ok(
+			receivedElement !== null,
+			"Should have received element via stream",
+		);
+		assert.equal(receivedElement?.tagName, "INPUT");
+		assert.equal(receivedElement?.type, "text");
+	});
+
+	it("should work with HTMLElement for div", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const ref = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLElement>>(Option.none()),
+		);
+
+		await runMount(<div ref={ref} id="my-div" />, root);
+
+		const element = Option.getOrThrow(await Effect.runPromise(Ref.get(ref)));
+		assert.equal(element.tagName, "DIV");
+		assert.equal(element.id, "my-div");
+	});
+
+	it("should work with HTMLInputElement", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const ref = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLInputElement>>(Option.none()),
+		);
+
+		await runMount(
+			<input ref={ref} type="email" value="test@example.com" />,
+			root,
+		);
+
+		const element = Option.getOrThrow(await Effect.runPromise(Ref.get(ref)));
+		assert.equal(element.tagName, "INPUT");
+		assert.equal(element.type, "email");
+		// Input value is a property, should be set
+		assert.equal(element.value, "test@example.com");
+	});
+
+	it("should work with HTMLButtonElement", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const ref = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLButtonElement>>(Option.none()),
+		);
+
+		await runMount(
+			<button ref={ref} type="submit" disabled>
+				Click
+			</button>,
+			root,
+		);
+
+		const element = Option.getOrThrow(await Effect.runPromise(Ref.get(ref)));
+		assert.equal(element.tagName, "BUTTON");
+		assert.equal(element.type, "submit");
+		assert.equal(element.disabled, true);
+	});
+
+	it("should process other props normally alongside ref", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const ref = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLElement>>(Option.none()),
+		);
+
+		await runMount(
+			<div
+				ref={ref}
+				id="test-id"
+				class="test-class"
+				data-custom="custom-value"
+				style={{ color: "red" }}
+			>
+				content
+			</div>,
+			root,
+		);
+
+		const element = Option.getOrThrow(await Effect.runPromise(Ref.get(ref)));
+		assert.equal(element.id, "test-id");
+		assert.equal(element.className, "test-class");
+		assert.equal(element.getAttribute("data-custom"), "custom-value");
+		assert.equal(element.style.color, "red");
+		assert.equal(element.textContent, "content");
+	});
+
+	it("should not treat non-Ref objects as refs", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		// An object that looks similar but is not a Ref
+		const notARef = { current: null };
+
+		await runMount(
+			// @ts-expect-error - testing invalid ref type
+			<div ref={notARef} data-test="value">
+				test
+			</div>,
+			root,
+		);
+
+		const div = root.children[0] as HTMLElement;
+		// The notARef object should have been ignored or treated as attribute
+		assert.equal(div.getAttribute("data-test"), "value");
+		assert.equal(div.textContent, "test");
+	});
+
+	it("should handle multiple refs on different elements independently", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const divRef = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLElement>>(Option.none()),
+		);
+		const spanRef = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLElement>>(Option.none()),
+		);
+		const inputRef = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLInputElement>>(Option.none()),
+		);
+
+		await runMount(
+			<div ref={divRef}>
+				<span ref={spanRef}>text</span>
+				<input ref={inputRef} type="text" />
+			</div>,
+			root,
+		);
+
+		const divElement = Option.getOrThrow(
+			await Effect.runPromise(Ref.get(divRef)),
+		);
+		const spanElement = Option.getOrThrow(
+			await Effect.runPromise(Ref.get(spanRef)),
+		);
+		const inputElement = Option.getOrThrow(
+			await Effect.runPromise(Ref.get(inputRef)),
+		);
+
+		assert.equal(divElement.tagName, "DIV");
+		assert.equal(spanElement.tagName, "SPAN");
+		assert.equal(inputElement.tagName, "INPUT");
+
+		// Verify they're all different elements
+		assert.notEqual(divElement, spanElement);
+		assert.notEqual(spanElement, inputElement);
+		assert.notEqual(divElement, inputElement);
+
+		// Verify parent-child relationships
+		assert.equal(spanElement.parentElement, divElement);
+		assert.equal(inputElement.parentElement, divElement);
+	});
+
+	it("should have Option.none as initial value before mount", async () => {
+		createTestDOM();
+		const root = createRoot();
+
+		const ref = await Effect.runPromise(
+			Ref.make<Option.Option<HTMLElement>>(Option.none()),
+		);
+
+		// Check value before mount
+		const valueBefore = await Effect.runPromise(Ref.get(ref));
+		assert.ok(
+			Option.isNone(valueBefore),
+			"Ref should be Option.none before mount",
+		);
+
+		await runMount(<div ref={ref}>test</div>, root);
+
+		// Check value after mount
+		const valueAfter = await Effect.runPromise(Ref.get(ref));
+		assert.ok(
+			Option.isSome(valueAfter),
+			"Ref should be Option.some after mount",
+		);
 	});
 });
