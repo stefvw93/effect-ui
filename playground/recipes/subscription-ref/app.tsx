@@ -311,7 +311,7 @@ const App = () => (
 		<a href="../" class="back-link">
 			&larr; Back to Recipes
 		</a>
-		<h1>SubscriptionRef (Signals)</h1>
+		<h1>SubscriptionRef</h1>
 
 		<section>
 			<h2>1. Basic Counter</h2>

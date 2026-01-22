@@ -46,9 +46,8 @@ const recipes = [
 	},
 	{
 		slug: "subscription-ref",
-		name: "SubscriptionRef (Signals)",
-		description:
-			"SolidJS-like reactive state with SubscriptionRef and .changes streams",
+		name: "SubscriptionRef",
+		description: "Reactive state with SubscriptionRef and .changes streams",
 	},
 ];
 

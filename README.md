@@ -43,7 +43,7 @@ Effect.runPromise(mount(app, document.getElementById("root")!));
 
 ## Examples
 
-### Reactive State (Signals)
+### Reactive State
 
 ```tsx
 import { Effect, Stream, SubscriptionRef } from "effect";
