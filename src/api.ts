@@ -39,8 +39,12 @@ export function mount(
 	InvalidElementTypeError | StreamSubscriptionError | RenderError
 > {
 	return Effect.gen(function* () {
-		// AC24: Create fresh ManagedRuntime per mount
-		const runtime = ManagedRuntime.make(Layer.empty);
+		// Capture current Effect context (includes any provided services)
+		// This allows event handlers to access services provided via Effect.provide(layer)
+		const effectContext = yield* Effect.context<never>();
+
+		// AC24: Create fresh ManagedRuntime per mount with captured context
+		const runtime = ManagedRuntime.make(Layer.succeedContext(effectContext));
 		const scope = yield* Scope.make();
 
 		// Create the RenderContext service implementation

@@ -1,7 +1,27 @@
-import { Effect, Stream } from "effect";
+import { Effect, pipe, Scope, Stream } from "effect";
 import { RenderContext } from "./render-core";
 import type { StreamSubscriptionError } from "./types";
 import { isStream, normalizeToStream } from "./utilities";
+
+// ============================================================================
+// Event Handler Detection
+// ============================================================================
+
+/**
+ * Checks if a prop name is an event handler (starts with "on" + lowercase letter)
+ */
+function isEventHandler(name: string): boolean {
+	if (name.length <= 2 || !name.startsWith("on")) {
+		return false;
+	}
+	const thirdChar = name[2];
+	// Must be a lowercase letter (a-z), not a number or uppercase
+	return (
+		thirdChar !== undefined &&
+		thirdChar >= "a" &&
+		thirdChar <= "z"
+	);
+}
 
 // ============================================================================
 // Attribute/Property Handling
@@ -18,6 +38,12 @@ export function setElementProps(
 		for (const [key, value] of Object.entries(props)) {
 			// AC7: Skip children prop
 			if (key === "children") {
+				continue;
+			}
+
+			// Event handlers (onclick, onchange, etc.)
+			if (isEventHandler(key)) {
+				yield* setEventHandler(element, key, value);
 				continue;
 			}
 
@@ -280,5 +306,80 @@ function subscribeToStream<A>(
 		// Note: Stream runs in background via forked fiber
 		// This matches the AC1 requirement that Effect completes after initial render
 		// and streams run in background
+	});
+}
+
+// ============================================================================
+// Event Handler Handling
+// ============================================================================
+
+/**
+ * Sets an event handler on an element (supports static, Stream, and Effect handlers)
+ */
+function setEventHandler(
+	element: HTMLElement,
+	name: string,
+	value: unknown,
+): Effect.Effect<void, StreamSubscriptionError, RenderContext> {
+	return Effect.gen(function* () {
+		const context = yield* RenderContext;
+		const eventName = name.slice(2).toLowerCase();
+
+		// Track current listener for cleanup
+		let currentListener: ((e: Event) => void) | null = null;
+
+		const removeListener = () => {
+			if (currentListener) {
+				element.removeEventListener(eventName, currentListener);
+				currentListener = null;
+			}
+		};
+
+		const attachListener = (handler: unknown) => {
+			// Remove previous listener if any
+			removeListener();
+
+			// null/false/undefined = no handler
+			if (handler == null || handler === false) {
+				return;
+			}
+
+			if (typeof handler !== "function") {
+				return; // Invalid handler, ignore
+			}
+
+			// Create wrapper that detects Effect return values
+			currentListener = (event: Event) => {
+				const result = handler(event);
+				if (Effect.isEffect(result)) {
+					context.runtime.runFork(
+						pipe(
+							result as Effect.Effect<void, unknown, never>,
+							Effect.catchAll((error) =>
+								Effect.logError(`Event handler error: ${name}`, { error }),
+							),
+						),
+					);
+				}
+			};
+
+			element.addEventListener(eventName, currentListener);
+		};
+
+		// Register cleanup finalizer with scope
+		yield* Scope.addFinalizer(context.scope, Effect.sync(removeListener));
+
+		// Handle static vs reactive handlers
+		if (isStream(value) || Effect.isEffect(value)) {
+			const stream = normalizeToStream(value);
+			yield* subscribeToStream(
+				stream,
+				(handler) => attachListener(handler),
+				`event:${name}`,
+			);
+		} else {
+			// Static handler
+			attachListener(value);
+		}
 	});
 }
