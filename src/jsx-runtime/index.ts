@@ -37,6 +37,22 @@ declare global {
 
 		interface IntrinsicElements extends HTMLElements, SVGElements {}
 
+		/**
+		 * Augment this interface with your app's Effect context requirements.
+		 *
+		 * @example
+		 * ```ts
+		 * declare global {
+		 *   namespace JSX {
+		 *     interface Requirements {
+		 *       _: Context.Tag.Service<typeof MyServiceTag>;
+		 *     }
+		 *   }
+		 * }
+		 * ```
+		 */
+		interface Requirements {}
+
 		// interface IntrinsicAttributes {}
 		// interface ElementChildrenAttribute {}
 	}

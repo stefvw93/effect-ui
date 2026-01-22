@@ -68,7 +68,20 @@ When ignoring lint rules, use Biome syntax:
 
 - `src/` - Source TypeScript files
 - `dist/` - Build output (excluded from TypeScript compilation)
+- `playground/` - Development playground and examples
+  - `app.tsx` - Main playground entry point
+  - `recipes/` - Standalone example recipes demonstrating patterns
 - ES modules only (`"type": "module"` in package.json)
+
+### Recipes
+
+The `playground/recipes/` folder contains standalone examples demonstrating specific patterns or features.
+
+**Rules for recipes:**
+- Every recipe must have a co-located README file named `{recipe-name}.readme.md`
+- Recipe files should be self-contained and runnable
+- Include a JSDoc header comment in the `.tsx` file explaining the recipe's purpose
+- READMEs should include: Overview, Problem, Solution, How It Works, and When to Use sections
 
 ## Coding Standards
 
@@ -108,6 +121,7 @@ When ignoring lint rules, use Biome syntax:
 - Follow Test-Driven Development workflow: spec → mock → test → implement
 - Co-locate test files (`*.test.ts`) next to source code
 - `__tests__/` directory allowed for compound/integration tests and shared fixtures/helpers
+- `__type-tests__/` directory for compile-time type tests (see Type Tests section below)
 - Write thorough tests against the API surface and specifications in co-located `specs.md` files
 - Test naming conventions:
   - Use `describe` for test grouping, `it` or `test` for individual test cases
@@ -118,6 +132,31 @@ When ignoring lint rules, use Biome syntax:
   - Test all possible error types defined in the Effect error union (expected errors)
   - Include edge cases defined in specifications
 - Use Effect testing utilities for testing Effect code
+
+### Type Tests
+Type tests verify compile-time behavior for complex type-level features. They use `@ts-expect-error` comments to assert that certain code should NOT compile.
+
+**Location:** `src/**/__type-tests__/*.test-d.ts`
+
+**Running type tests:**
+```bash
+pnpm typecheck.type-tests
+```
+
+**Rules:**
+- Type test files use the `.test-d.ts` extension (convention from `tsd` and similar tools)
+- Use `@ts-expect-error` to assert code that should fail to compile
+- Type tests are excluded from the main `pnpm typecheck` to avoid conflicts with other augmentations
+- Each type test file should be self-contained and test a specific feature
+
+**Example pattern:**
+```typescript
+// Should compile - valid usage
+const _valid: SomeType = validValue;
+
+// @ts-expect-error - Should NOT compile - invalid usage
+const _invalid: SomeType = invalidValue;
+```
 
 ### Specification Files
 - Every new feature must have a co-located `specs.md` file (e.g., `dom/feature.ts`, `dom/feature.test.ts`, `dom/feature.specs.md`)

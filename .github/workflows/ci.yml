@@ -58,6 +58,9 @@ jobs:
       - name: Run type checking
         run: pnpm typecheck
 
+      - name: Run type tests
+        run: pnpm typecheck.type-tests
+
       - name: Run tests with coverage
         run: pnpm test
 
