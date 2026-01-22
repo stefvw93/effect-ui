@@ -77,7 +77,11 @@ declare const streamWithServiceC: Stream.Stream<string, never, ServiceC>;
 const _unregistered: JSXChild = streamWithServiceC;
 
 // Stream with mix of registered and unregistered should fail
-declare const streamWithAandC: Stream.Stream<string, never, ServiceA | ServiceC>;
+declare const streamWithAandC: Stream.Stream<
+	string,
+	never,
+	ServiceA | ServiceC
+>;
 // @ts-expect-error - ServiceC is not registered in JSX.Requirements
 const _mixedUnregistered: JSXChild = streamWithAandC;
 
