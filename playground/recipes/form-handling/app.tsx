@@ -224,10 +224,28 @@ const validateField = <A, I>(schema: Schema.Schema<A, I>, value: I) => {
 };
 
 const SchemaForm = () => {
-	const [usernameStream, setUsername] = createEmitter("");
-	const [passwordStream, setPassword] = createEmitter("");
-	const [ageStream, setAge] = createEmitter("");
+	// Track current values for validation on submit
+	let currentUsername = "";
+	let currentPassword = "";
+	let currentAge = "";
+
+	const [usernameStream, setUsernameStream] = createEmitter("");
+	const [passwordStream, setPasswordStream] = createEmitter("");
+	const [ageStream, setAgeStream] = createEmitter("");
 	const [statusStream, setStatus] = createEmitter<string | null>(null);
+
+	const setUsername = (v: string) => {
+		currentUsername = v;
+		setUsernameStream(v);
+	};
+	const setPassword = (v: string) => {
+		currentPassword = v;
+		setPasswordStream(v);
+	};
+	const setAge = (v: string) => {
+		currentAge = v;
+		setAgeStream(v);
+	};
 
 	const usernameError = Stream.map(usernameStream, (v) =>
 		v ? validateField(Username, v) : null,
@@ -262,7 +280,24 @@ const SchemaForm = () => {
 				return Effect.gen(function* () {
 					setStatus("Validating...");
 					yield* Effect.sleep("500 millis");
-					setStatus("Registration successful!");
+
+					// Validate all fields
+					const errors = [
+						validateField(Username, currentUsername),
+						validateField(Password, currentPassword),
+						validateField(Age, currentAge),
+					].filter(Boolean);
+
+					if (
+						errors.length > 0 ||
+						!currentUsername ||
+						!currentPassword ||
+						!currentAge
+					) {
+						setStatus("Please fix validation errors");
+					} else {
+						setStatus("Registration successful!");
+					}
 				});
 			}}
 		>

@@ -44,12 +44,8 @@ const StreamCounter = () =>
 			// Create click streams and merge them with +1/-1 values
 			Stream.flatMap(({ incBtn, decBtn }) =>
 				Stream.merge(
-					Stream.fromEventListener(incBtn, "click").pipe(
-						Stream.map(() => 1 as number),
-					),
-					Stream.fromEventListener(decBtn, "click").pipe(
-						Stream.map(() => -1 as number),
-					),
+					Stream.fromEventListener(incBtn, "click").pipe(Stream.map(() => 1)),
+					Stream.fromEventListener(decBtn, "click").pipe(Stream.map(() => -1)),
 				),
 			),
 			// Accumulate the count
