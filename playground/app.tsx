@@ -19,7 +19,7 @@ const App = () =>
 	Effect.gen(function* () {
 		yield* Console.log("App");
 		return (
-			<div>
+			<div style={{ fontFamily: "monospace" }}>
 				{Array.from({ length: 10 }, (_, i) => i).map((i) => (
 					<A label={`${i}`} />
 				))}
