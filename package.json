@@ -6,7 +6,7 @@
 	},
 	"version": "0.0.0",
 	"description": "A reactive DOM rendering library built on Effect that enables declarative UI with streams and automatic updates.",
-	"license": "ISC",
+	"license": "MIT",
 	"author": "Stef van Wijchen",
 	"type": "module",
 	"exports": {
