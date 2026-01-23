@@ -2,51 +2,105 @@
 
 [![CI + Release](https://github.com/stefvw93/effect-ui/actions/workflows/ci-release.yml/badge.svg)](https://github.com/stefvw93/effect-ui/actions/workflows/ci-release.yml)
 
-A reactive DOM rendering library built on [Effect](https://effect.website) that enables declarative UI with streams and automatic updates.
+> Production-grade frontend development with [Effect](https://effect.website)
+
+## Why effect-ui?
+
+Frontend at scale is hard. Real applications need robust API orchestration, error handling, retries, telemetry, and observability. [Effect](https://effect.website) solves these problems elegantly on the backend; effect-ui brings the same patterns to the browser.
+
+effect-ui is a reactive DOM rendering library that makes Effect and Stream first-class JSX citizens. Components run once, and streams drive all updates. No virtual DOM, no diffing: just direct DOM manipulation with reactive bindings.
+
+> **Early Development Notice**: effect-ui is in active early development. APIs may change rapidly. Not recommended for production use yet.
 
 ## Features
 
-- 🎯 **Effect-first**: Built entirely on Effect's powerful abstractions
-- 🌊 **Reactive Streams**: First-class support for Effect streams in JSX
-- ⚡ **Automatic Updates**: DOM automatically subscribes to streams and updates
-- 🎨 **Dynamic Styles**: Stream-based style updates with full TypeScript support
-- 📦 **Zero Virtual DOM**: Direct DOM manipulation with reactive bindings
-- 🔧 **Type-Safe**: Full TypeScript support including streams in JSX props
+- **Effect-first architecture**: Services, Layers, and dependency injection in the browser
+- **Reactive primitives**: Effect and Stream as first-class JSX citizens
+- **Ephemeral components**: Components run once, streams drive updates
+- **Full TypeScript support**: Type-safe JSX with streams in props and children
 
-## Requirements
+## Installation
 
-- Node.js ≥ 24.7.0
-- pnpm ≥ 10.28.0
+Install from [GitHub releases](https://github.com/stefvw93/effect-ui/releases) (not yet published to package registries).
 
-## Quick Start
+Configure TypeScript for effect-ui's JSX runtime:
 
-Install from latest release, then:
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "effect-ui"
+  }
+}
+```
+
+**New to Effect?** Check out the [Effect documentation](https://effect.website/docs/getting-started/introduction) to learn the fundamentals.
+
+## Examples
+
+### API Call with Error Handling and Retry
+
+Effect's retry and error handling patterns work directly in your UI:
 
 ```tsx
 import { Effect, Stream, Schedule } from "effect";
 import { mount } from "effect-ui";
 
-// Create a reactive counter
-const counter = Stream.iterate(0, n => n + 1).pipe(
-  Stream.schedule(Schedule.spaced(1000))
-);
+const fetchUser = (id: number) =>
+  Effect.tryPromise({
+    try: () => fetch(`/api/users/${id}`).then(r => r.json()),
+    catch: () => new Error("Failed to fetch user"),
+  });
 
-// Mount reactive UI
-const app = (
-  <div>
-    <h1>Count: {counter}</h1>
-  </div>
-);
+const UserProfile = ({ id }: { id: number }) =>
+  Stream.concat(
+    Stream.make(<div>Loading...</div>),
+    Stream.fromEffect(
+      fetchUser(id).pipe(
+        Effect.retry(Schedule.exponential("100 millis").pipe(Schedule.compose(Schedule.recurs(3)))),
+        Effect.map(user => <div>{user.name}</div>),
+        Effect.catchAll(() => Effect.succeed(<div>Failed to load user</div>))
+      )
+    )
+  );
 
-Effect.runPromise(mount(app, document.getElementById("root")!));
+Effect.runPromise(mount(<UserProfile id={1} />, document.getElementById("root")!));
 ```
 
-## Examples
+### Event Handler with Logging
 
-### Reactive State
+Effect handlers enable telemetry, logging, and observability:
 
 ```tsx
-import { Effect, Stream, SubscriptionRef } from "effect";
+import { Effect } from "effect";
+
+const saveData = (data: FormData) =>
+  Effect.gen(function* () {
+    yield* Effect.log("Save initiated", { timestamp: Date.now() });
+    yield* Effect.tryPromise(() => fetch("/api/save", { method: "POST", body: data }));
+    yield* Effect.log("Save completed");
+  });
+
+const SaveButton = ({ data }: { data: FormData }) => (
+  <button
+    onclick={() =>
+      saveData(data).pipe(
+        Effect.tap(() => Effect.log("User clicked save")),
+        Effect.catchAll(error => Effect.log("Save failed", { error }))
+      )
+    }
+  >
+    Save
+  </button>
+);
+```
+
+### Reactive State with SubscriptionRef
+
+SubscriptionRef provides reactive state with automatic stream-based updates:
+
+```tsx
+import { Effect, SubscriptionRef } from "effect";
 
 const Counter = () =>
   Effect.gen(function* () {
@@ -62,184 +116,66 @@ const Counter = () =>
   });
 ```
 
-### Async Data Loading
-
-```tsx
-const UserProfile = ({ id }: { id: number }) =>
-  Stream.concat(
-    Stream.make(<div>Loading...</div>),
-    Stream.fromEffect(
-      Effect.gen(function* () {
-        const user = yield* fetchUser(id);
-        return <div>{user.name}</div>;
-      })
-    )
-  );
-```
-
-### Effect Event Handlers
-
-```tsx
-const SaveButton = () => (
-  <button
-    onclick={() =>
-      Effect.gen(function* () {
-        yield* Effect.log("Saving...");
-        yield* saveData();
-        yield* Effect.log("Done!");
-      })
-    }
-  >
-    Save
-  </button>
-);
-```
-
 ### Derived Streams
 
+Transform reactive values with standard Stream operations:
+
 ```tsx
-const count = yield* SubscriptionRef.make(0);
+import { Effect, Stream, SubscriptionRef } from "effect";
 
-const doubled = Stream.map(count.changes, n => n * 2);
-const isEven = Stream.map(count.changes, n => n % 2 === 0 ? "Yes" : "No");
+const Dashboard = () =>
+  Effect.gen(function* () {
+    const count = yield* SubscriptionRef.make(0);
 
-return (
-  <div>
-    <p>Count: {count.changes}</p>
-    <p>Doubled: {doubled}</p>
-    <p>Even: {isEven}</p>
-  </div>
-);
+    const doubled = Stream.map(count.changes, n => n * 2);
+    const status = Stream.map(count.changes, n => (n > 10 ? "High" : "Normal"));
+
+    return (
+      <div>
+        <p>Count: {count.changes}</p>
+        <p>Doubled: {doubled}</p>
+        <p>Status: {status}</p>
+        <button onclick={() => SubscriptionRef.update(count, n => n + 1)}>Increment</button>
+      </div>
+    );
+  });
 ```
-
-## Interactive Playground
-
-The project includes a Vite-powered playground with interactive examples demonstrating Effect UI's capabilities.
-
-### Running the Playground
-
-```bash
-pnpm dev
-```
-
-Open http://localhost:3000 in your browser to see:
-
-- **Auto-incrementing Counter** - Stream-based counter updating every second
-- **Dynamic Styles** - Animated colors and sizes using streams
-- **Status Indicator** - Effect delays simulating async operations
-- **Live Clock** - Real-time clock using scheduled streams
-- **Random Numbers** - Stream-generated random values
-- **Streaming List** - Progressive list building with streams
-- **Mixed Content** - Static and dynamic content combined
-
-### Playground Features
-
-The playground demonstrates:
-- Reactive DOM updates without manual subscriptions
-- Stream transformations and scheduling
-- Effect-based async operations
-- Dynamic style properties with streams
-- Type-safe JSX with full stream support
 
 ## Core Concepts
 
-### Streams as Children
-
-JSX elements can directly render streams:
+**Streams as children**: JSX elements render streams directly; each emitted value replaces the previous:
 
 ```tsx
 const message = Stream.make("Loading...", "Ready!");
 <div>{message}</div>
 ```
 
-### Stream Properties
-
-Any prop can be a stream for reactive updates:
+**Stream properties**: Any prop can be a stream for reactive updates:
 
 ```tsx
-const color = Stream.iterate(["red", "blue", "green"], colors =>
-  colors.slice(1).concat(colors[0])
-).pipe(Stream.schedule(Schedule.spaced(1000)));
-
-<div style={{ color }}>Changing colors!</div>
+const isDisabled = Stream.make(true, false);
+<button disabled={isDisabled}>Submit</button>
 ```
 
-### Style Streams
-
-Styles support multiple stream patterns:
+**Stream styles**: Styles support streams at any level:
 
 ```tsx
-// Stream individual properties
-<div style={{ width: widthStream, height: "100px" }} />
-
-// Stream entire style string
-<div style={Stream.make("color: red", "color: blue")} />
-
-// Stream style object
+<div style={{ color: colorStream, width: "100px" }} />
 <div style={Stream.make({ color: "red" }, { color: "blue" })} />
 ```
 
-## Scripts
+## Playground
 
-- `pnpm dev` - Start the interactive playground
-- `pnpm build` - Build the project using tsdown
-- `pnpm test` - Run tests with Node.js native test runner
-- `pnpm test.watch` - Run tests in watch mode
-- `pnpm lint` - Check code with Biome
-- `pnpm lint.fix` - Fix linting issues automatically
-- `pnpm typecheck` - Run TypeScript type checking
-
-## Architecture
-
-### DOM Rendering
-
-Effect UI uses direct DOM manipulation with reactive bindings:
-- Comment markers track stream children locations
-- ManagedRuntime handles subscriptions per mount
-- Automatic cleanup on stream completion
-
-### JSX Runtime
-
-Custom JSX runtime with:
-- Support for classic transform (esbuild/Vite)
-- Fragment support
-- Full type safety for streams in props and children
-
-### Type System
-
-Comprehensive TypeScript definitions:
-- Stream-compatible attributes for all HTML elements
-- Style prop supporting strings, objects, and streams
-- Effect and Stream types integrated into JSX
-
-## Tech Stack
-
-- **Effect** - Functional programming foundation
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Fast development server with HMR
-- **esbuild** - Lightning-fast JSX transformation
-- **tsdown** - Fast TypeScript bundler
-- **Biome** - Fast linter and formatter
-- **Node.js test runner** - Native testing with tsx loader
-- **JSDOM** - DOM testing environment
+Run `pnpm dev` to start an interactive playground with examples at http://localhost:3000.
 
 ## Development
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Run tests
-pnpm test
-
-# Start playground
-pnpm dev
-
-# Type check
-pnpm typecheck
-
-# Lint and fix
-pnpm lint.fix
+pnpm install     # Install dependencies
+pnpm dev         # Start playground
+pnpm test        # Run tests
+pnpm typecheck   # Type check
+pnpm lint.fix    # Lint and fix
 ```
 
 ## License
