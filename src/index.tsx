@@ -1,6 +1,10 @@
 import { Context, Effect, Layer, ManagedRuntime } from "effect";
 import type { JSXNode } from "@/jsx-runtime";
 
+// ============================================================================
+// Core Runtime
+// ============================================================================
+
 export interface EffectUIRuntimeImpl {
 	readonly environment: "client" | "server";
 }
@@ -18,11 +22,49 @@ function render(app: JSXNode, config: EffectUIRuntimeImpl) {
 	return result;
 }
 
-// USER LAND
+// ============================================================================
+// Client-Side Exports
+// ============================================================================
 
-export function main() {
-	const result = render(<div id={Effect.succeed("")}>Hello</div>, {
-		environment: "client",
-	});
-	console.log(result);
-}
+export type { MountHandle } from "@/dom";
+export { mount } from "@/dom";
+
+// ============================================================================
+// Server-Side Exports
+// ============================================================================
+
+export type {
+	HydrationManifest,
+	HydrationMetadata,
+	HydrationOptions,
+	HydrationPriority,
+	SSROptions,
+} from "@/ssr";
+export {
+	ClientOnly,
+	hydrate,
+	isClient,
+	isServer,
+	renderToStream,
+	renderToString,
+	ServerOnly,
+} from "@/ssr";
+
+// ============================================================================
+// Shared Exports
+// ============================================================================
+
+export {
+	AsyncComponentError,
+	InvalidElementType,
+	RenderError,
+	SSRRenderError,
+	StreamSubscriptionError,
+} from "@/shared/errors";
+
+// ============================================================================
+// JSX Runtime (re-export for convenience)
+// ============================================================================
+
+export type { JSXNode, JSXType, PropsWithChildren } from "@/jsx-runtime";
+export { Fragment, jsx, jsxs } from "@/jsx-runtime";

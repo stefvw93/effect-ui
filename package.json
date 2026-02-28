@@ -12,6 +12,7 @@
 	"scripts": {
 		"build": "tsdown",
 		"dev": "vite playground --config vite.config.ts",
+		"dev:server": "tsx watch playground-server/src/server.tsx",
 		"lint": "biome check",
 		"lint.fix": "biome check --write",
 		"test": "node --import tsx --test src/**/*.test.{ts,tsx}",

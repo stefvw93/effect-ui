@@ -1,66 +1,18 @@
-import {
-	Context,
-	Data,
-	Effect,
-	Exit,
-	Layer,
-	ManagedRuntime,
-	Scope,
-	Stream,
-} from "effect";
+import { Effect, Exit, Layer, ManagedRuntime, Scope, Stream } from "effect";
 import type { JSXNode } from "@/jsx-runtime";
 import { FRAGMENT } from "@/jsx-runtime";
-
-// ============================================================================
-// Error Types
-// ============================================================================
-
-/**
- * Error thrown when JSXNode has invalid type (not string, FRAGMENT, or function)
- */
-export class InvalidElementType extends Data.TaggedError("InvalidElementType")<{
-	readonly type: unknown;
-	readonly message: string;
-}> {}
-
-/**
- * Error thrown when stream subscription or execution fails
- */
-export class StreamSubscriptionError extends Data.TaggedError(
-	"StreamSubscriptionError",
-)<{
-	readonly cause: unknown;
-	readonly context: string;
-}> {}
-
-/**
- * Error thrown for general rendering failures
- */
-export class RenderError extends Data.TaggedError("RenderError")<{
-	readonly cause: unknown;
-	readonly message: string;
-}> {}
-
-// ============================================================================
-// Services
-// ============================================================================
-
-/**
- * Service for managing rendering context including runtime, scope, and stream IDs
- */
-export class RenderContext extends Context.Tag("RenderContext")<
-	RenderContext,
-	{
-		readonly runtime: ManagedRuntime.ManagedRuntime<never, never>;
-		readonly scope: Scope.Scope;
-		readonly streamIdCounter: { current: number };
-	}
->() {}
+import {
+	InvalidElementType,
+	type RenderError,
+	type StreamSubscriptionError,
+} from "@/shared/errors";
+import type { DOMRenderResult } from "@/shared/jsx-utils";
+import { RenderContext } from "@/shared/render-context";
 
 /**
  * Result of rendering a JSXNode - can be single node, multiple nodes, or null
  */
-type RenderResult = Node | readonly Node[] | null;
+type RenderResult = DOMRenderResult;
 
 // ============================================================================
 // Public API

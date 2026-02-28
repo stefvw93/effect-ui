@@ -136,7 +136,11 @@ When ignoring lint rules, use Biome syntax:
   - Ensure implementation matches mock signatures exactly
   - Ensure implementation matches co-located specs.md files
   - If implementation reveals mocks/specs need changes: pause implementation and update specs/mocks first (maintain strict spec → mock → test → implement cycle)
-  - After implementation: re-run tests, type checks (`pnpm typecheck`), and linting (`pnpm lint.fix`)
+  - **CRITICAL: After ANY code changes, ALWAYS run:**
+    1. `pnpm typecheck` - Ensure TypeScript types are correct
+    2. `pnpm lint.fix` - Fix linting issues automatically
+    3. `pnpm test` - Verify tests still pass
+  - **Never skip these checks - they are mandatory for every code change**
 - Specs MUST include:
   - Feature overview and purpose
   - Detailed acceptance criteria
