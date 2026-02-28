@@ -5,7 +5,7 @@ runs:
   using: composite
   steps:
       - name: Setup
-        uses: ../setup
+        uses: stefvw93/effect-ui/.github/actions/setup@main
 
       - name: Build workspace packages
         run: pnpm build
