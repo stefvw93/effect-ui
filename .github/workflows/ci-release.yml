@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build workspace packages
-        run: pnpm build
+        uses: ./.github/actions/build
 
       - name: Run type checking
         run: pnpm -r typecheck
@@ -61,7 +61,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build workspace packages
-        run: pnpm build
+        uses: ./.github/actions/build
 
       - name: Run tests
         run: pnpm test
@@ -78,7 +78,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build project
-        run: pnpm build
+        uses: ./.github/actions/build
 
   check:
     name: CI Status
@@ -118,7 +118,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build
-        run: pnpm build
+        uses: ./.github/actions/build
 
       - name: Release
         env:
