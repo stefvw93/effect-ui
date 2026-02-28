@@ -8,8 +8,7 @@
 	},
 	"dependencies": {
 		"@effect-ui/dom": "workspace:*",
-		"@effect-ui/jsx-runtime": "workspace:*",
-		"effect": "^3.19.14"
+		"@effect-ui/jsx-runtime": "workspace:*"
 	},
 	"devDependencies": {
 		"vite": "^7.3.1"

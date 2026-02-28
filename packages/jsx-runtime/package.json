@@ -20,9 +20,6 @@
 		"typecheck": "tsc",
 		"typecheck.type-tests": "tsc --project tsconfig.type-tests.json"
 	},
-	"peerDependencies": {
-		"effect": "^3.19.14"
-	},
 	"dependencies": {
 		"@effect-ui/html-types": "workspace:*"
 	}

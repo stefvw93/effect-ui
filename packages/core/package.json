@@ -15,9 +15,6 @@
 		"build": "tsdown",
 		"typecheck": "tsc"
 	},
-	"peerDependencies": {
-		"effect": "^3.19.14"
-	},
 	"dependencies": {
 		"@effect-ui/jsx-runtime": "workspace:*"
 	}
