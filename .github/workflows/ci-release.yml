@@ -40,6 +40,9 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
+      - name: Build workspace packages
+        run: pnpm build
+
       - name: Run type checking
         run: pnpm -r typecheck
 
@@ -56,6 +59,9 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
+
+      - name: Build workspace packages
+        run: pnpm build
 
       - name: Run tests
         run: pnpm test
