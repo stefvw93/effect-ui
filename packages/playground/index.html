@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Effect UI - Playground</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+			background: #fff;
+			min-height: 100vh;
+			color: #000;
+			padding: 2rem;
+		}
+
+		#root {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			margin-bottom: 1rem;
+		}
+
+		.demo-section {
+			margin: 2rem 0;
+			padding: 1rem;
+			border: 1px solid #000;
+		}
+
+		.demo-section h2 {
+			margin-bottom: 1rem;
+			font-size: 1rem;
+		}
+
+		button {
+			background: #000;
+			color: #fff;
+			border: none;
+			padding: 0.5rem 1rem;
+			cursor: pointer;
+			font-family: inherit;
+			font-size: 0.9rem;
+		}
+
+		button:hover {
+			background: #333;
+		}
+
+		.stream-value {
+			padding: 0.5rem;
+			background: #f5f5f5;
+			margin: 0.5rem 0;
+		}
+
+		.counter {
+			font-size: 2rem;
+			font-weight: bold;
+			margin: 1rem 0;
+		}
+
+		input {
+			padding: 0.5rem;
+			border: 1px solid #000;
+			font-family: inherit;
+			font-size: 0.9rem;
+			margin: 0.5rem 0;
+			width: 100%;
+		}
+
+		input:focus {
+			outline: none;
+			border-width: 2px;
+		}
+
+		.status {
+			padding: 0.25rem 0.5rem;
+			display: inline-block;
+			margin: 0.25rem;
+			border: 1px solid #000;
+		}
+
+		.status.online {
+			background: #dfd;
+		}
+
+		.status.offline {
+			background: #fdd;
+		}
+
+		.status.pending {
+			background: #ffd;
+		}
+
+		a {
+			color: #000;
+		}
+	</style>
+</head>
+<body>
+	<div id="root"></div>
+	<script type="module" src="./app.tsx"></script>
+</body>
+</html>

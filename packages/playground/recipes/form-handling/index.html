@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Recipe: Form Handling - Effect UI</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+			background: #fff;
+			min-height: 100vh;
+			color: #000;
+			padding: 2rem;
+		}
+
+		#root {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			margin-bottom: 1rem;
+		}
+
+		h2 {
+			margin-bottom: 0.5rem;
+			font-size: 1rem;
+		}
+
+		.back-link {
+			display: inline-block;
+			color: #000;
+			margin-bottom: 1.5rem;
+			font-size: 0.9rem;
+		}
+
+		section {
+			margin: 1.5rem 0;
+			padding: 1rem;
+			border: 1px solid #000;
+		}
+
+		input, textarea {
+			padding: 0.5rem;
+			border: 1px solid #000;
+			font-family: inherit;
+			font-size: 0.9rem;
+			margin: 0.5rem 0;
+			width: 100%;
+		}
+
+		input:focus, textarea:focus {
+			outline: none;
+			border-width: 2px;
+		}
+
+		.error-text {
+			color: #c00;
+			font-size: 0.85rem;
+			margin-top: 0.25rem;
+		}
+
+		.success-text {
+			color: #060;
+			font-size: 0.85rem;
+			margin-top: 0.25rem;
+		}
+
+		.preview {
+			padding: 0.5rem;
+			background: #f5f5f5;
+			margin-top: 0.5rem;
+		}
+
+		button {
+			background: #000;
+			color: #fff;
+			border: none;
+			padding: 0.5rem 1rem;
+			cursor: pointer;
+			font-family: inherit;
+			font-size: 0.9rem;
+			margin-top: 0.5rem;
+		}
+
+		button:hover {
+			background: #333;
+		}
+
+		.form-group {
+			margin-bottom: 1rem;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 0.25rem;
+		}
+	</style>
+</head>
+<body>
+	<div id="root"></div>
+	<script type="module" src="./app.tsx"></script>
+</body>
+</html>

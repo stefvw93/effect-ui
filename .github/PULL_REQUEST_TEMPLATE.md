@@ -24,13 +24,5 @@
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] Any dependent changes have been merged and published
 
-## Testing
-<!-- Describe the tests you ran to verify your changes -->
-
-- [ ] `pnpm lint` passes
-- [ ] `pnpm typecheck` passes
-- [ ] `pnpm test` passes
-- [ ] `pnpm build` succeeds
-
 ## Additional Context
 <!-- Add any other context, screenshots, or considerations about the PR here -->

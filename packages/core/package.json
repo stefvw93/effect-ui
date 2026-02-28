@@ -1,0 +1,24 @@
+{
+	"name": "@effect-ui/core",
+	"version": "0.0.0",
+	"description": "Shared rendering infrastructure for effect-ui",
+	"license": "MIT",
+	"author": "Stef van Wijchen",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"scripts": {
+		"build": "tsdown",
+		"typecheck": "tsc"
+	},
+	"peerDependencies": {
+		"effect": "^3.19.14"
+	},
+	"dependencies": {
+		"@effect-ui/jsx-runtime": "workspace:*"
+	}
+}

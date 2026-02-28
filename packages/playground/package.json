@@ -1,0 +1,17 @@
+{
+	"name": "playground",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite . --config vite.config.ts"
+	},
+	"dependencies": {
+		"@effect-ui/dom": "workspace:*",
+		"@effect-ui/jsx-runtime": "workspace:*",
+		"effect": "^3.19.14"
+	},
+	"devDependencies": {
+		"vite": "^7.3.1"
+	}
+}

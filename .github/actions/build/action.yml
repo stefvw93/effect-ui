@@ -1,0 +1,12 @@
+name: Build
+description: Build workspace packages
+
+runs:
+  using: composite
+  steps:
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build workspace packages
+        shell: bash
+        run: pnpm build
