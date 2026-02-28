@@ -1,0 +1,25 @@
+{
+	"name": "@effect-ui/server",
+	"version": "0.0.0",
+	"description": "Server side rendering for effect-ui",
+	"license": "MIT",
+	"author": "Stef van Wijchen",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"scripts": {
+		"build": "tsdown",
+		"test": "node --import tsx --test src/**/*.test.{ts,tsx}",
+		"test.watch": "node --import tsx --test --watch src/**/*.test.{ts,tsx}",
+		"typecheck": "tsc"
+	},
+	"dependencies": {
+		"@effect-ui/core": "workspace:*",
+		"@effect-ui/html-types": "workspace:*",
+		"@effect-ui/jsx-runtime": "workspace:*"
+	}
+}
