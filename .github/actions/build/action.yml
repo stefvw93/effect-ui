@@ -5,7 +5,7 @@ runs:
   using: composite
   steps:
       - name: Setup
-        uses: stefvw93/effect-ui/.github/actions/setup@main
+        uses: ./.github/actions/setup
 
       - name: Build workspace packages
         shell: bash
