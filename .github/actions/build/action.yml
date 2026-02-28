@@ -8,4 +8,5 @@ runs:
         uses: stefvw93/effect-ui/.github/actions/setup@main
 
       - name: Build workspace packages
+        shell: bash
         run: pnpm build
