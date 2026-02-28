@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup
-        uses: .github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Run linter
         run: pnpm lint
@@ -38,10 +38,10 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup
-        uses: .github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Build workspace packages
-        uses: .github/actions/build
+        uses: ./.github/actions/build
 
       - name: Run type checking
         run: pnpm -r typecheck
@@ -58,10 +58,10 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup
-        uses: .github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Build workspace packages
-        uses: .github/actions/build
+        uses: ./.github/actions/build
 
       - name: Run tests
         run: pnpm test
@@ -75,10 +75,10 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup
-        uses: .github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Build project
-        uses: .github/actions/build
+        uses: ./.github/actions/build
 
   check:
     name: CI Status
@@ -115,10 +115,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup
-        uses: .github/actions/setup
+        uses: ./.github/actions/setup
 
       - name: Build
-        uses: .github/actions/build
+        uses: ./.github/actions/build
 
       - name: Release
         env:
