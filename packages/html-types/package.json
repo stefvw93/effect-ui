@@ -1,0 +1,24 @@
+{
+	"name": "@effect-ui/html-types",
+	"version": "0.0.0",
+	"description": "Renderer-agnostic HTML/SVG/ARIA type definitions for effect-ui",
+	"license": "MIT",
+	"author": "Stef van Wijchen",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"scripts": {
+		"build": "tsdown",
+		"typecheck": "tsc"
+	},
+	"peerDependencies": {
+		"effect": "^3.19.14"
+	},
+	"dependencies": {
+		"csstype": "^3.2.3"
+	}
+}

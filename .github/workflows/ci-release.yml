@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run type checking
-        run: pnpm typecheck
+        run: pnpm -r typecheck
 
       - name: Run type tests
         run: pnpm typecheck.type-tests

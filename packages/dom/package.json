@@ -1,0 +1,33 @@
+{
+	"name": "@effect-ui/dom",
+	"version": "0.0.0",
+	"description": "Client-side DOM renderer for effect-ui",
+	"license": "MIT",
+	"author": "Stef van Wijchen",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"scripts": {
+		"build": "tsdown",
+		"test": "node --import tsx --test src/**/*.test.{ts,tsx}",
+		"test.watch": "node --import tsx --test --watch src/**/*.test.{ts,tsx}",
+		"typecheck": "tsc"
+	},
+	"peerDependencies": {
+		"effect": "^3.19.14"
+	},
+	"dependencies": {
+		"@effect-ui/core": "workspace:*",
+		"@effect-ui/html-types": "workspace:*",
+		"@effect-ui/jsx-runtime": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/jsdom": "^27.0.0",
+		"jsdom": "^27.4.0",
+		"tsx": "^4.21.0"
+	}
+}

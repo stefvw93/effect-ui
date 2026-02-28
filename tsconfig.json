@@ -1,31 +1,10 @@
 {
-	"$schema": "https://json.schemastore.org/tsconfig",
-	"exclude": ["dist/**/*", "src/**/__type-tests__/**/*"],
-
-	"compilerOptions": {
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"target": "esnext",
-		"lib": ["esnext", "dom"],
-		"types": ["node"],
-
-		"noEmit": true,
-		"stripInternal": true,
-		"paths": {
-			"@/*": ["./src/*"],
-			"~/*": ["./*"]
-		},
-
-		"jsx": "react-jsx",
-		"jsxImportSource": "@",
-
-		"noUncheckedIndexedAccess": true,
-		"noImplicitReturns": true,
-		"strict": true,
-		"verbatimModuleSyntax": true,
-		"isolatedModules": true,
-		"noUncheckedSideEffectImports": true,
-		"moduleDetection": "force",
-		"skipLibCheck": true
-	}
+	"extends": "./tsconfig.base.json",
+	"include": [],
+	"references": [
+		{ "path": "packages/html-types" },
+		{ "path": "packages/jsx-runtime" },
+		{ "path": "packages/core" },
+		{ "path": "packages/dom" }
+	]
 }

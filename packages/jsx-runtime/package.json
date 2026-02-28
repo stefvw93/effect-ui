@@ -1,0 +1,29 @@
+{
+	"name": "@effect-ui/jsx-runtime",
+	"version": "0.0.0",
+	"description": "JSX transform functions and global namespace augmentation for effect-ui",
+	"license": "MIT",
+	"author": "Stef van Wijchen",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		},
+		"./jsx-runtime": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"scripts": {
+		"build": "tsdown",
+		"typecheck": "tsc",
+		"typecheck.type-tests": "tsc --project tsconfig.type-tests.json"
+	},
+	"peerDependencies": {
+		"effect": "^3.19.14"
+	},
+	"dependencies": {
+		"@effect-ui/html-types": "workspace:*"
+	}
+}
