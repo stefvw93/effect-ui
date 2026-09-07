@@ -12,7 +12,7 @@ Two entry points: `@weftui/dom/client` for the browser, `@weftui/dom/server` for
 npm install @weftui/core @weftui/dom effect@beta
 ```
 
-Weft tracks Effect 4's beta line. This release is built and tested against `effect@4.0.0-beta.98`; the peer range accepts newer 4.0 betas, which may contain upstream breaking changes.
+Weft tracks Effect 4's prerelease line (beta, then rc). This release is built and tested against `effect@4.0.0-beta.98`; the peer range accepts newer 4.0 prereleases, which may contain upstream breaking changes.
 
 `effect` is a peer dependency; `@weftui/core` is required to author the tree.
 
