@@ -1,10 +1,11 @@
 name: Effect Beta Bump
 
-# Advances the workspace's tested Effect 4 beta floor (see
-# scripts/bump-effect-beta.mjs): checks npm's `beta` dist-tag daily, bumps the
-# catalog pin + peer-range floors + "tested against" doc tokens, validates the
-# workspace against the new beta, and opens a PR. If validation fails the PR is
-# opened as a draft so a breaking upstream beta is visible instead of silent.
+# Advances the workspace's tested Effect 4 prerelease floor (see
+# scripts/bump-effect-beta.mjs): checks npm's `rc` + `beta` dist-tags daily,
+# bumps the catalog pin + peer-range floors + "tested against" doc tokens,
+# validates the workspace against the new prerelease, and opens a PR. If
+# validation fails the PR is opened as a draft so a breaking upstream release is
+# visible instead of silent.
 #
 # Note: PRs created with the default GITHUB_TOKEN do not trigger the CI + Release
 # workflow. Validation therefore runs here and its results are posted in the PR
@@ -36,13 +37,15 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Bump to latest effect beta
+      - name: Bump to latest effect prerelease
         id: bump
         run: node scripts/bump-effect-beta.mjs
 
+      # The bump rewrote the catalog pin, so the lockfile is stale by design.
+      # CI defaults pnpm to --frozen-lockfile, which refuses exactly that.
       - name: Refresh lockfile
         if: steps.bump.outputs.updated == 'true'
-        run: vp install
+        run: vp install --no-frozen-lockfile
 
       - name: Validate — check
         id: check
@@ -96,15 +99,15 @@ jobs:
           commit-message: "fix(deps): bump effect to ${{ steps.bump.outputs.version }}"
           title: "fix(deps): bump effect to ${{ steps.bump.outputs.version }}"
           body: |
-            Automated bump of the tested Effect 4 beta floor to `effect@${{ steps.bump.outputs.version }}`
+            Automated bump of the tested Effect 4 prerelease floor to `effect@${{ steps.bump.outputs.version }}`
             (catalog pin, peer-range floors, "tested against" doc tokens, lockfile).
 
-            Validation against the new beta (run in the [Effect Beta Bump workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})):
+            Validation against the new prerelease (run in the [Effect Beta Bump workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})):
 
             - `vp run check`: **${{ steps.check.outcome }}**
             - `vp run test`: **${{ steps.test.outcome }}**
             - `vp run test:browser`: **${{ steps.test-browser.outcome }}**
 
             Opened as a draft when any validation step failed — a failure here
-            usually means the new beta ships upstream breaking changes that need
+            usually means the new prerelease ships upstream breaking changes that need
             a migration commit on this branch before merging.
